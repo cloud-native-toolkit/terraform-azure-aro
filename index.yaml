@@ -1,0 +1,9 @@
+name: azure-aro
+type: terraform
+description: Module to provision aro on azure
+tags:
+  - tools
+  - devops
+versions: []
+cloudProvider: azure
+id: github.com/cloud-native-toolkit/terraform-azure-aro
