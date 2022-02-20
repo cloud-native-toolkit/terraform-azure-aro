@@ -80,7 +80,7 @@ resource null_resource aro {
 data external aro {
   depends_on = [null_resource.aro]
 
-  program = ["bash", "${path.module}/get-cluster.sh"]
+  program = ["bash", "${path.module}/scripts/get-cluster.sh"]
 
   query = {
     bin_dir = module.setup_clis.bin_dir
