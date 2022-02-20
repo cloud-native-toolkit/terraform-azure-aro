@@ -5,8 +5,8 @@ locals {
   vnet_id = data.azurerm_virtual_network.vnet.id
   id = data.external.aro.result.id
   cluster_config = ""
-  server_url = lookup(lookup(data.external.aro.result, "properties", {fqdn = ""}), "fqdn", "")
-  ingress_hostname = lookup(lookup(data.external.aro.result, "routerProfiles", {publicSubdomain = ""}), "publicSubdomain", "")
+  server_url = lookup(data.external.aro.result, "fqdn", "")
+  ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
   cluster_type = "openshift"
   cluster_type_code = "ocp4"
   cluster_version = var.openshift_version

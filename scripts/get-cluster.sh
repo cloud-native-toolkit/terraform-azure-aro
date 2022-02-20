@@ -17,4 +17,5 @@ URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroup
 curl -X GET \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
-  "${URL}"
+  "${URL}" | \
+  ${BIN_DIR}/jq '{id: .id, location: .location, fqdn: .properties.fqdn, publicHostname: .properties.publicHostname, router_fqdn: .properties.routerProfiles[0].fqdn, publicSubdomain: .properties.routerProfiles[0].publicSubdomain}'
