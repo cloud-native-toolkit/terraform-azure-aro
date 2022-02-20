@@ -18,7 +18,10 @@ jobs:
     strategy:
       matrix:
         testcase:
-          - ocp4_latest
+          - azure_vpc
+        enabled:
+          - true
+          - false
       fail-fast: false
 
     env:
@@ -35,8 +38,11 @@ jobs:
           clusterId: ${{ matrix.testcase }}
           validateDeployScript: .github/scripts/validate-deploy.sh
         env:
-          TF_VAR_ibmcloud_api_key: ${{ secrets.IBMCLOUD_API_KEY }}
-          IBMCLOUD_API_KEY: ${{ secrets.IBMCLOUD_API_KEY }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          TF_VAR_enabled: ${{ matrix.enabled }}
 
       - name: Verify destroy on ${{ matrix.testcase }}
         uses: cloud-native-toolkit/action-module-verify-destroy@main
@@ -44,8 +50,11 @@ jobs:
         with:
           clusterId: ${{ matrix.testcase }}
         env:
-          TF_VAR_ibmcloud_api_key: ${{ secrets.IBMCLOUD_API_KEY }}
-          IBMCLOUD_API_KEY: ${{ secrets.IBMCLOUD_API_KEY }}
+          TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          TF_VAR_enabled: ${{ matrix.enabled }}
 
   verifyMetadata:
     runs-on: ubuntu-latest
