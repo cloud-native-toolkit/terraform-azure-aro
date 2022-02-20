@@ -3,5 +3,4 @@ module "resource_group" {
 
   resource_group_name = var.resource_group_name
   region              = var.region
-  enabled             = var.enabled
 }

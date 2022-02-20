@@ -11,10 +11,3 @@ module "cluster" {
   worker_cidr = module.worker_subnets.cidr_blocks[0]
   vpc_name = module.vpc.name
 }
-
-
-resource null_resource print_enabled {
-  provisioner "local-exec" {
-    command = "echo -n '${module.cluster.enabled}' > .enabled"
-  }
-}

@@ -7,7 +7,6 @@ module "master_subnets" {
   _count = 1
   ipv4_cidr_blocks = ["10.1.1.0/24"]
   label = "master"
-  enabled = var.enabled
 }
 
 module "worker_subnets" {
@@ -19,5 +18,4 @@ module "worker_subnets" {
   _count = 1
   ipv4_cidr_blocks = ["10.1.2.0/24"]
   label = "worker"
-  enabled = var.enabled
 }

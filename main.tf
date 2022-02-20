@@ -2,11 +2,11 @@ locals {
   tmp_dir = "${path.cwd}/.tmp/aro"
   name_prefix = var.name_prefix != null && var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-cluster"
-  vnet_id = length(data.azurerm_virtual_network.vnet) ? data.azurerm_virtual_network.vnet[0].id : ""
-  id = length(data.external.aro) > 0 ? data.external.aro[0].result.id : ""
+  vnet_id = data.azurerm_virtual_network.vnet.id
+  id = data.external.aro.result.id
   cluster_config = ""
-  server_url = length(data.external.aro) > 0 ? data.external.aro[0].result.properties.fqdn : ""
-  ingress_hostname = length(data.external.aro) > 0 ? data.external.aro[0].result.routerProfiles.publicSubdomain : ""
+  server_url = data.external.aro.result.properties.fqdn
+  ingress_hostname = data.external.aro[0].result.routerProfiles.publicSubdomain
   cluster_type = "openshift"
   cluster_type_code = "ocp4"
   cluster_version = var.openshift_version
@@ -21,14 +21,12 @@ module setup_clis {
 }
 
 data azurerm_virtual_network vnet {
-  count = var.enabled ? 1 : 0
-
   name                = var.vpc_name
   resource_group_name = var.resource_group_name
 }
 
 resource null_resource aro {
-  count = var.provision && var.enabled ? 1 : 0
+  count = var.provision ? 1 : 0
 
   triggers = {
     subscription_id = var.subscription_id
@@ -72,7 +70,6 @@ resource null_resource aro {
 }
 
 data external aro {
-  count = var.enabled ? 1 : 0
   depends_on = [null_resource.aro]
 
   program = ["bash", "${path.module}/get-cluster.sh"]

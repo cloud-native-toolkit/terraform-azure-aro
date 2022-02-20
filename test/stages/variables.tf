@@ -16,8 +16,6 @@ variable "name_prefix" {
   default     = ""
 }
 
-variable "enabled" {}
-
 variable "subscription_id" {}
 
 variable "client_id" {}

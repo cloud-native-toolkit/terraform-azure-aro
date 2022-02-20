@@ -1,5 +1,5 @@
 output "id" {
-  value       = length(data.external.aro) > 0 ? data.external.aro[0].result.id : ""
+  value       = data.external.aro.result.id
   description = "ID of the cluster."
 }
 
@@ -28,7 +28,7 @@ output "config_file_path" {
 
 output "platform" {
   value = {
-    id         = length(data.external.aro) > 0 ? data.external.aro[0].result.id : ""
+    id         = data.external.aro.result.id
     kubeconfig = local.cluster_config
     server_url = local.server_url
     type       = local.cluster_type

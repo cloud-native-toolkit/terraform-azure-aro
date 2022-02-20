@@ -92,12 +92,6 @@ variable "provision" {
   default     = true
 }
 
-variable "enabled" {
-  type        = bool
-  description = "Flag indicating the module should be enabled"
-  default     = true
-}
-
 variable "name" {
   type        = string
   description = "The name of the ARO cluster. If empty the name will be derived from the name prefix"
