@@ -6,7 +6,7 @@ locals {
   id = data.external.aro.result.id
   cluster_config = ""
   server_url = data.external.aro.result.properties.fqdn
-  ingress_hostname = data.external.aro[0].result.routerProfiles.publicSubdomain
+  ingress_hostname = data.external.aro.result.routerProfiles.publicSubdomain
   cluster_type = "openshift"
   cluster_type_code = "ocp4"
   cluster_version = var.openshift_version
