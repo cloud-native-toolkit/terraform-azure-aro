@@ -20,7 +20,15 @@ module setup_clis {
   clis = ["jq"]
 }
 
+resource null_resource print_names {
+  provisioner "local-exec" {
+    command = "echo 'VPC name: ${var.vpc_name}'"
+  }
+}
+
 data azurerm_virtual_network vnet {
+  depends_on = [null_resource.print_names]
+
   name                = var.vpc_name
   resource_group_name = var.resource_group_name
 }
