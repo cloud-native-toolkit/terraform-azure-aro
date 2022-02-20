@@ -32,7 +32,10 @@ mkdir -p "${TMP_DIR}"
 #CLIENT_SECRET=""
 #TENANT_ID=""
 
-TOKEN=$(curl -X POST -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&resource=https%3A%2F%2Fmanagement.azure.com%2F" "https://login.microsoftonline.com/${TENANT_ID}/oauth2/token")
+echo "Getting token"
+TOKEN=$(curl -s -X POST -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&resource=https%3A%2F%2Fmanagement.azure.com%2F" "https://login.microsoftonline.com/${TENANT_ID}/oauth2/token")
+
+echo "Got token: ${TOKEN}"
 
 URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.ContainerService/openShiftManagedClusters/${CLUSTER_NAME}?api-version=${API_VERSION}"
 
@@ -94,7 +97,7 @@ cat > "${TMP_DIR}/config.json" << EOF
 }
 EOF
 
-curl -X PUT \
+curl -s -X PUT \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   "${URL}" \
