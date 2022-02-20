@@ -52,7 +52,7 @@ resource null_resource aro {
       TMP_DIR = local.tmp_dir
       TENANT_ID = self.triggers.tenant_id
       CLIENT_ID = self.triggers.client_id
-      CLIENT_SECRET = self.triggers.client_secret
+      CLIENT_SECRET = nonsensitive(self.triggers.client_secret)
       OPENSHIFT_VERSION = var.openshift_version
       VM_SIZE = var.flavor
       MASTER_SIZE = var.master_flavor
@@ -72,7 +72,7 @@ resource null_resource aro {
     environment = {
       TENANT_ID = self.triggers.tenant_id
       CLIENT_ID = self.triggers.client_id
-      CLIENT_SECRET = self.triggers.client_secret
+      CLIENT_SECRET = nonsensitive(self.triggers.client_secret)
     }
   }
 }
