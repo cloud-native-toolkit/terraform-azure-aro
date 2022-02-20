@@ -2,6 +2,8 @@
 
 set -e
 
+env
+
 eval "$(${bin_dir}/jq -r '@sh "CLUSTER_NAME=\(.cluster_name) RESOURCE_GROUP_NAME=\(.resource_group_name) SUBSCRIPTION_ID=\(.subscription_id) TENANT_ID=\(.tenant_id) CLIENT_ID=\(.client_id)" CLIENT_SECRET=\(.client_secret)')"
 
 API_VERSION="2019-04-30"

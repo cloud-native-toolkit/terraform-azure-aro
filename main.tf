@@ -37,6 +37,7 @@ resource null_resource aro {
   count = var.provision ? 1 : 0
 
   triggers = {
+    bin_dir = module.setup_clis.bin_dir
     subscription_id = var.subscription_id
     resource_group_name = var.resource_group_name
     cluster_name = local.cluster_name
@@ -49,6 +50,7 @@ resource null_resource aro {
     command = "${path.module}/scripts/create-cluster.sh '${self.triggers.subscription_id}' '${self.triggers.resource_group_name}' '${self.triggers.cluster_name}' '${var.region}' '${local.vnet_id}' '${var.master_cidr}' '${var.worker_cidr}'"
 
     environment = {
+      BIN_DIR = self.triggers.bin_dir
       TMP_DIR = local.tmp_dir
       TENANT_ID = self.triggers.tenant_id
       CLIENT_ID = self.triggers.client_id
@@ -70,6 +72,7 @@ resource null_resource aro {
     command = "${path.module}/scripts/destroy-cluster.sh '${self.triggers.subscription_id}' '${self.triggers.resource_group_name}' '${self.triggers.cluster_name}'"
 
     environment = {
+      BIN_DIR = self.triggers.bin_dir
       TENANT_ID = self.triggers.tenant_id
       CLIENT_ID = self.triggers.client_id
       CLIENT_SECRET = nonsensitive(self.triggers.client_secret)
@@ -89,6 +92,6 @@ data external aro {
     subscription_id = var.subscription_id
     tenant_id = var.tenant_id
     client_id = var.client_id
-    client_secret = var.client_secret
+    client_secret = nonsensitive(var.client_secret)
   }
 }
