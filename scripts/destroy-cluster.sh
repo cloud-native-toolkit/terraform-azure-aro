@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 SUBSCRIPTION_ID="$1"
 RESOURCE_GROUP_NAME="$2"
 CLUSTER_NAME="$3"
