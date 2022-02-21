@@ -53,13 +53,13 @@ variable "vpc_name" {
 variable "master_flavor" {
   type        = string
   description = "The size of the VMs for the master nodes"
-  default     = "Standard_D4s_v3"
+  default     = "Standard_D8s_v3"
 }
 
 variable "flavor" {
   type        = string
   description = "The size of the VMs for the worker nodes"
-  default     = "Standard_D4s_v3"
+  default     = "Standard_D2s_v3"
 }
 
 variable "_count" {
