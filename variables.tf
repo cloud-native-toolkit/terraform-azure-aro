@@ -59,7 +59,7 @@ variable "master_flavor" {
 variable "flavor" {
   type        = string
   description = "The size of the VMs for the worker nodes"
-  default     = "Standard_D2s_v3"
+  default     = "Standard_D8s_v3"
 }
 
 variable "_count" {
