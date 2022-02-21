@@ -38,6 +38,3 @@ curl -s -X GET \
   "${URL}" > "${TMP_DIR}/credentials.json"
 
 jq -s '.[0] * .[1]' "${TMP_DIR}/output.json" "${TMP_DIR}/credentials.json"
-
-rm "${TMP_DIR}/output.json"
-rm "${TMP_DIR}/credentials.json"
