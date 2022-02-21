@@ -8,6 +8,8 @@ BIN_DIR=$(echo "${INPUT}" | grep "bin_dir" | sed -E 's/.*"bin_dir": ?"([^"]+)".*
 
 eval "$(echo "${INPUT}" | ${BIN_DIR}/jq -r '@sh "CLUSTER_NAME=\(.cluster_name) RESOURCE_GROUP_NAME=\(.resource_group_name) SUBSCRIPTION_ID=\(.subscription_id) TENANT_ID=\(.tenant_id) CLIENT_ID=\(.client_id) CLIENT_SECRET=\(.client_secret) TOKEN=\(.access_token // empty) TMP_DIR=\(.tmp_dir)"')"
 
+echo "Input: ${INPUT}"
+
 API_VERSION="2020-04-30"
 
 if [[ -z "${TMP_DIR}" ]]; then
