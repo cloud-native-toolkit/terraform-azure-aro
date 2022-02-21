@@ -23,7 +23,7 @@ DISK_SIZE="${DISK_SIZE:-128}"
 
 VISIBILITY="${VISIBILITY:-Public}"
 
-API_VERSION="2019-04-30"
+API_VERSION="2020-04-30"
 
 if [[ -z "${TMP_DIR}" ]]; then
   TMP_DIR=".tmp/aro"
