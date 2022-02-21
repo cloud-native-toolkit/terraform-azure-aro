@@ -74,7 +74,7 @@ resource null_resource aro {
       CLIENT_SECRET = nonsensitive(self.triggers.client_secret)
       OPENSHIFT_VERSION = var.openshift_version
       VM_SIZE = var.flavor
-      MASTER_SIZE = var.master_flavor
+      MASTER_VM_SIZE = var.master_flavor
       OS_TYPE = var.os_type
       WORKER_COUNT = var._count
       AUTH_GROUP_ID= var.auth_group_id
