@@ -11,6 +11,7 @@ locals {
   tls_secret = ""
   total_workers = var._count
   visibility = var.disable_public_endpoint ? "Private" : "Public"
+  domain = "${local.cluster_name}.${var.region}.aroapp.io"
   server_url = lookup(data.external.aro.result, "serverUrl", "")
   ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
   console_url = lookup(data.external.aro.result, "consoleUrl", "")
@@ -61,7 +62,7 @@ resource null_resource aro {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/create-cluster.sh '${self.triggers.subscription_id}' '${self.triggers.resource_group_name}' '${self.triggers.resource_group_id}' '${self.triggers.cluster_name}' '${var.region}' '${local.vnet_id}' '${var.master_subnet_id}' '${var.worker_subnet_id}'"
+    command = "${path.module}/scripts/create-cluster.sh '${self.triggers.subscription_id}' '${self.triggers.resource_group_name}' '${self.triggers.resource_group_id}' '${self.triggers.cluster_name}' '${var.region}' '${local.vnet_id}' '${var.master_subnet_id}' '${var.worker_subnet_id}' '${local.domain}'"
 
     environment = {
       BIN_DIR = self.triggers.bin_dir

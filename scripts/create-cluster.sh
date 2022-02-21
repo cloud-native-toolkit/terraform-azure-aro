@@ -12,6 +12,7 @@ REGION="$5"
 VNET_ID="$6"
 MASTER_SUBNET_ID="$7"
 WORKER_SUBNET_ID="$8"
+DOMAIN="$9"
 
 OPENSHIFT_VERSION="${OPENSHIFT_VERSION:-4.8}"
 VM_SIZE="${VM_SIZE:-Standard_D4s_v3}"
@@ -49,7 +50,9 @@ cat > "${TMP_DIR}/config.json" << EOF
   "tags": {},
   "properties": {
     "clusterProfile": {
-      "resourceGroupId": "${RESOURCE_GROUP_ID}"
+      "resourceGroupId": "${RESOURCE_GROUP_ID}",
+      "domain": "${DOMAIN}",
+      "version": "${OPENSHIFT_VERSION}"
     },
     "consoleProfile": {},
     "servicePrincipalProfile": {
