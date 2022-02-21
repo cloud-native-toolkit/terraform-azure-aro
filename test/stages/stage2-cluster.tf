@@ -11,3 +11,9 @@ module "cluster" {
   worker_subnet_id = module.worker_subnets.ids[0]
   vpc_name = module.vpc.name
 }
+
+resource null_resource kubeconfig {
+  provisioner "local-exec" {
+    command = "echo -n '${module.cluster.config_file_path}' > .kubeconfig"
+  }
+}
