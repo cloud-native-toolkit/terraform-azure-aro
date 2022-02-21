@@ -98,5 +98,5 @@ OUTPUT=$(curl -s -X PUT \
   "${URL}" \
   --data-binary "@${TMP_DIR}/config.json")
 
-cat $OUTPUT
+echo "$OUTPUT"
 
