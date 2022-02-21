@@ -7,7 +7,7 @@ module "cluster" {
   client_secret = var.client_secret
   resource_group_name = var.resource_group_name
   region = var.region
-  master_cidr = module.master_subnets.cidr_blocks[0]
-  worker_cidr = module.worker_subnets.cidr_blocks[0]
+  master_cidr = module.master_subnets.id
+  worker_cidr = module.worker_subnets.id
   vpc_name = module.vpc.name
 }

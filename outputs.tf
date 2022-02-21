@@ -23,7 +23,7 @@ output "region" {
 output "config_file_path" {
   value       = local.cluster_config
   description = "Path to the config file for the cluster."
-  depends_on  = [data.external.aro]
+  depends_on  = [null_resource.oc_login]
 }
 
 output "platform" {
@@ -39,7 +39,7 @@ output "platform" {
   }
   sensitive = true
   description = "Configuration values for the cluster platform"
-  depends_on  = [data.external.aro]
+  depends_on  = [null_resource.oc_login]
 }
 
 output "sync" {

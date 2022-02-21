@@ -29,14 +29,14 @@ variable "region" {
   description = "The location where the cluster should be provisioned"
 }
 
-variable "master_cidr" {
+variable "master_subnet_id" {
   type        = string
-  description = "The CIDR block for the master network"
+  description = "The id of the subnet where the master nodes will be placed"
 }
 
-variable "worker_cidr" {
+variable "worker_subnet_id" {
   type        = string
-  description = "The CIDR block for the worker network"
+  description = "The id of the subnet where the worker nodes will be placed"
 }
 
 variable "openshift_version" {
@@ -60,18 +60,6 @@ variable "flavor" {
   type        = string
   description = "The size of the VMs for the worker nodes"
   default     = "Standard_D4s_v3"
-}
-
-variable "master_count" {
-  type        = number
-  description = "The number of master nodes"
-  default     = 3
-}
-
-variable "infra_count" {
-  type        = number
-  description = "The number of infrastructure worker nodes"
-  default     = 2
 }
 
 variable "_count" {
@@ -108,4 +96,16 @@ variable "auth_group_id" {
   type        = string
   description = "The id of the auth group for cluster admins"
   default     = ""
+}
+
+variable "disable_public_endpoint" {
+  type        = bool
+  description = "Flag to make the cluster private only"
+  default     = false
+}
+
+variable "disk_size" {
+  type        = number
+  description = "The size in GB of the disk for each worker node"
+  default     = 128
 }
