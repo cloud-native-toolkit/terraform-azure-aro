@@ -1,8 +1,0 @@
-{
-  "id": "/subscriptions/bc1627c6-ec80-4da3-8d18-03e91330e2f1/resourceGroups/aro-rg/providers/Microsoft.RedHatOpenShift/openShiftClusters/cluster",
-  "name": "cluster",
-  "location": "eastus",
-  "serverUrl": "https://api.u5fcy5cr.eastus.aroapp.io:6443/",
-  "publicSubdomain": "u5fcy5cr",
-  "consoleUrl": "https://console-openshift-console.apps.u5fcy5cr.eastus.aroapp.io/"
-}
