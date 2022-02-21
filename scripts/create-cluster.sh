@@ -86,8 +86,8 @@ cat > "${TMP_DIR}/config.json" << EOF
 }
 EOF
 
-if [[ -z "${PULL_SECRET}" ]]; then
-  jq --arg PULL_SECRET "${PULL_SECRET}" '.properties.clusterProfile.pullSecret = env(PULL_SECRET)' "${TMP_DIR}/config.json" > "${TMP_DIR}/config.json.tmp"
+if [[ -n "${PULL_SECRET}" ]]; then
+  jq --arg PULL_SECRET "${PULL_SECRET}" '.properties.clusterProfile.pullSecret = $PULL_SECRET' "${TMP_DIR}/config.json" > "${TMP_DIR}/config.json.tmp"
   cp "${TMP_DIR}/config.json.tmp" "${TMP_DIR}/config.json"
   rm "${TMP_DIR}/config.json.tmp"
 fi
