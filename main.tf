@@ -17,6 +17,16 @@ locals {
   console_url = lookup(data.external.aro.result, "consoleUrl", "")
   username = lookup(data.external.aro.result, "kubeadminUsername", "")
   password = lookup(data.external.aro.result, "kubeadminPassword", "")
+  aro_data = jsonencode({
+    tmp_dir             = local.tmp_dir
+    bin_dir             = module.setup_clis.bin_dir
+    cluster_name        = local.cluster_name
+    resource_group_name = var.resource_group_name
+    subscription_id     = var.subscription_id
+    tenant_id           = var.tenant_id
+    client_id           = var.client_id
+    client_secret       = nonsensitive(var.client_secret)
+  })
 }
 
 module setup_clis {
@@ -97,8 +107,16 @@ resource null_resource aro {
   }
 }
 
-data external aro {
+resource null_resource aro_info {
   depends_on = [null_resource.aro]
+
+  provisioner "local-exec" {
+    command = "echo '${local.aro_data}' | ${path.module}/scripts/get-cluster.sh"
+  }
+}
+
+data external aro {
+  depends_on = [null_resource.aro, null_resource.aro_info]
 
   program = ["bash", "${path.module}/scripts/get-cluster.sh"]
 
