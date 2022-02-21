@@ -35,6 +35,6 @@ AUTH_URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resource
 curl -s -X GET \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
-  "${URL}" > "${TMP_DIR}/credentials.json"
+  "${AUTH_URL}" > "${TMP_DIR}/credentials.json"
 
 jq -s '.[0] * .[1]' "${TMP_DIR}/output.json" "${TMP_DIR}/credentials.json"
