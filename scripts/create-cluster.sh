@@ -52,7 +52,7 @@ cat > "${TMP_DIR}/config.json" << EOF
     "clusterProfile": {
       "resourceGroupId": "${RESOURCE_GROUP_ID}",
       "domain": "${DOMAIN}",
-      "version": "${OPENSHIFT_VERSION}"
+      "version": "v${OPENSHIFT_VERSION}"
     },
     "consoleProfile": {},
     "servicePrincipalProfile": {
