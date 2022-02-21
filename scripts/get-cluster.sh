@@ -32,7 +32,6 @@ URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroup
 
 STATE="Creating"
 while [[ "${STATE}" == "Creating" ]]; do
-  echo "Getting cluster info: ${URL}"
   curl -s -X GET \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
@@ -41,21 +40,24 @@ while [[ "${STATE}" == "Creating" ]]; do
 
   STATE=$(cat "${TMP_DIR}/output.json" | jq -r ".state")
   if [[ "${STATE}" == "Creating" ]]; then
-    echo "Cluster is being created. Sleeping for 1 minute"
-    sleep 60
+    sleep 300
   fi
 done
 
-echo "Cluster output"
-cat "${TMP_DIR}/output.json"
-
 AUTH_URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.RedHatOpenShift/openShiftClusters/${CLUSTER_NAME}/listCredentials?api-version=${API_VERSION}"
 
-echo "Getting cluster auth info: ${AUTH_URL}"
+if [[ "${STATE}" != "Failed" ]]; then
 curl -s -X POST \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -d "" \
   "${AUTH_URL}" > "${TMP_DIR}/credentials.json"
+else
+  echo '{}' > "${TMP_DIR}/credentials.json"
+fi
 
 jq -s '.[0] * .[1]' "${TMP_DIR}/output.json" "${TMP_DIR}/credentials.json"
+
+if [[ "${STATE}" == "Failed" ]]; then
+  exit 1
+fi
