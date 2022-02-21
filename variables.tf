@@ -42,7 +42,7 @@ variable "worker_subnet_id" {
 variable "openshift_version" {
   type        = string
   description = "The version of the openshift cluster"
-  default     = "4.8"
+  default     = "4.8.11"
 }
 
 variable "vpc_name" {
