@@ -35,7 +35,10 @@ curl -s -X GET \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   "${URL}" | \
-  ${BIN_DIR}/jq '{id: .id, name: .name, location: .location, serverUrl: .properties.apiserverProfile.url, publicSubdomain: .properties.clusterProfile.domain, consoleUrl: .properties.consoleProfile.url}' > "${TMP_DIR}/output.json"
+  ${BIN_DIR}/jq '{id: .id, name: .name, location: .location, state: .properties.provisioningState, serverUrl: .properties.apiserverProfile.url, publicSubdomain: .properties.clusterProfile.domain, consoleUrl: .properties.consoleProfile.url}' > "${TMP_DIR}/output.json"
+
+echo "Cluster output"
+cat "${TMP_DIR}/output.json"
 
 AUTH_URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.RedHatOpenShift/openShiftClusters/${CLUSTER_NAME}/listCredentials?api-version=${API_VERSION}"
 
