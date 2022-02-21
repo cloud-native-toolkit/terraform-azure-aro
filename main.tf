@@ -34,17 +34,19 @@ resource null_resource print_names {
   }
 }
 
-data azurerm_resource_group resource_group {
-  depends_on = [null_resource.print_names]
+module "cluster_rg" {
+  source = "github.com/cloud-native-toolkit/terraform-azure-resource-group"
+  count = var.provision ? 1 : 0
 
-  name = var.resource_group_name
+  resource_group_name = "${local.cluster_name}-rg"
+  region              = var.region
 }
 
 data azurerm_virtual_network vnet {
   depends_on = [null_resource.print_names]
 
   name                = var.vpc_name
-  resource_group_name = data.azurerm_resource_group.resource_group.name
+  resource_group_name = var.resource_group_name
 }
 
 resource null_resource aro {
@@ -53,8 +55,8 @@ resource null_resource aro {
   triggers = {
     bin_dir = module.setup_clis.bin_dir
     subscription_id = var.subscription_id
-    resource_group_name = data.azurerm_resource_group.resource_group.name
-    resource_group_id = data.azurerm_resource_group.resource_group.id
+    resource_group_name = var.resource_group_name
+    resource_group_id = module.cluster_rg[0].id
     cluster_name = local.cluster_name
     tenant_id = var.tenant_id
     client_id = var.client_id
