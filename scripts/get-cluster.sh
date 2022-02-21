@@ -30,12 +30,21 @@ fi
 
 URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.RedHatOpenshift/openShiftClusters/${CLUSTER_NAME}?api-version=${API_VERSION}"
 
-echo "Getting cluster info: ${URL}"
-curl -s -X GET \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  "${URL}" | \
-  ${BIN_DIR}/jq '{id: .id, name: .name, location: .location, state: .properties.provisioningState, serverUrl: .properties.apiserverProfile.url, publicSubdomain: .properties.clusterProfile.domain, consoleUrl: .properties.consoleProfile.url}' > "${TMP_DIR}/output.json"
+STATE="Creating"
+while [[ "${STATE}" == "Creating" ]]; do
+  echo "Getting cluster info: ${URL}"
+  curl -s -X GET \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    "${URL}" | \
+    ${BIN_DIR}/jq '{id: .id, name: .name, location: .location, state: .properties.provisioningState, serverUrl: .properties.apiserverProfile.url, publicSubdomain: .properties.clusterProfile.domain, consoleUrl: .properties.consoleProfile.url}' > "${TMP_DIR}/output.json"
+
+  STATE=$(cat "${TMP_DIR}/output.json" | jq -r ".state")
+  if [[ "${STATE}" == "Creating" ]]; then
+    echo "Cluster is being created. Sleeping for 1 minute"
+    sleep 60
+  fi
+done
 
 echo "Cluster output"
 cat "${TMP_DIR}/output.json"
