@@ -7,6 +7,7 @@ module "master_subnets" {
   _count = 1
   ipv4_cidr_blocks = ["10.1.1.0/24"]
   label = "master"
+  disable_private_link_endpoint_network_policies = true
 }
 
 module "worker_subnets" {
