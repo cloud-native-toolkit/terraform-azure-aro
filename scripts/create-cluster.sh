@@ -50,8 +50,7 @@ cat > "${TMP_DIR}/config.json" << EOF
   "tags": {},
   "properties": {
     "clusterProfile": {
-      "resourceGroupId": "${RESOURCE_GROUP_ID}",
-      "domain": "${DOMAIN}"
+      "resourceGroupId": "${RESOURCE_GROUP_ID}"
     },
     "consoleProfile": {},
     "servicePrincipalProfile": {
