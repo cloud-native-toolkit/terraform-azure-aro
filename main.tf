@@ -11,7 +11,7 @@ locals {
   tls_secret = ""
   total_workers = var._count
   visibility = var.disable_public_endpoint ? "Private" : "Public"
-  domain = "${local.cluster_name}.${var.region}.aroapp.io"
+  domain = random_string.cluster_domain
   server_url = lookup(data.external.aro.result, "serverUrl", "")
   ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
   console_url = lookup(data.external.aro.result, "consoleUrl", "")
@@ -45,11 +45,19 @@ resource null_resource print_names {
   }
 }
 
+resource random_string cluster_domain {
+  length = 8
+  special = false
+  upper = false
+  lower = true
+  number = true
+}
+
 module "cluster_rg" {
   source = "github.com/cloud-native-toolkit/terraform-azure-resource-group"
   count = var.provision ? 1 : 0
 
-  resource_group_name = "${local.cluster_name}-rg"
+  resource_group_name = "aro-${random_string.cluster_domain}"
   region              = var.region
 }
 

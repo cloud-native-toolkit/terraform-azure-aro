@@ -49,6 +49,10 @@ cat > "${TMP_DIR}/config.json" << EOF
   "location": "${REGION}",
   "tags": {},
   "properties": {
+    "clusterProfile": {
+      "resourceGroupId": "${RESOURCE_GROUP_ID}",
+      "domain": "${DOMAIN}"
+    },
     "consoleProfile": {},
     "servicePrincipalProfile": {
       "clientId": "${CLIENT_ID}",
