@@ -108,8 +108,16 @@ resource null_resource aro {
   }
 }
 
-data external aro {
+resource null_resource aro_info {
   depends_on = [null_resource.aro]
+
+  provisioner "local-exec" {
+    command = "echo '${local.aro_data}' | ${path.module}/scripts/get-cluster.sh"
+  }
+}
+
+data external aro {
+  depends_on = [null_resource.aro, null_resource.aro_info]
 
   program = ["bash", "${path.module}/scripts/get-cluster.sh"]
 
