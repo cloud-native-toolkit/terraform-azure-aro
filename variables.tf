@@ -109,3 +109,15 @@ variable "disk_size" {
   description = "The size in GB of the disk for each worker node"
   default     = 128
 }
+
+variable "pull_secret" {
+  type        = string
+  description = "The contents of the pull secret needed to access Red Hat content. The contents can either be provided directly or passed through the `pull_secret_file` variable"
+  default     = ""
+}
+
+variable "pull_secret_file" {
+  type        = string
+  description = "Name of the file containing the pull secret needed to access Red Hat content. The contents can either be provided in this file or directly via the `pull_secret` variable"
+  default     = ""
+}

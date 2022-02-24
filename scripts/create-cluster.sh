@@ -34,8 +34,7 @@ mkdir -p "${TMP_DIR}"
 #CLIENT_ID=""
 #CLIENT_SECRET=""
 #TENANT_ID=""
-
-PULL_SECRET=""
+#PULL_SECRET=""
 
 echo "Getting token"
 TOKEN=$(curl -s -X POST -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&resource=https%3A%2F%2Fmanagement.azure.com%2F" "https://login.microsoftonline.com/${TENANT_ID}/oauth2/token" | ${BIN_DIR}/jq -r '.access_token')
@@ -66,15 +65,7 @@ cat > "${TMP_DIR}/config.json" << EOF
       "vmSize": "${MASTER_VM_SIZE}",
       "subnetId": "${MASTER_SUBNET_ID}"
     },
-    "workerProfiles": [
-      {
-        "name": "worker",
-        "vmSize": "${VM_SIZE}",
-        "diskSizeGB": ${DISK_SIZE},
-        "subnetId": "${WORKER_SUBNET_ID}",
-        "count": ${WORKER_COUNT}
-      }
-    ],
+    "workerProfiles": [],
     "apiserverProfile": {
       "visibility": "${VISIBILITY}"
     },
@@ -87,6 +78,21 @@ cat > "${TMP_DIR}/config.json" << EOF
   }
 }
 EOF
+
+count=0
+while [[ ${count} -lt ${WORKER_COUNT} ]]; do
+  count=$((count + 1))
+  name="${CLUSTER_NAME}-worker-${REGION}${count}"
+  cat "${TMP_DIR}/config.json" | \
+    ${BIN_DIR}/jq \
+      --arg NAME "${NAME}" \
+      --arg VM_SIZE "${VM_SIZE}" \
+      --arg DISK_SIZE "${DISK_SIZE}" \
+      --arg SUBNET_ID "${WORKER_SUBNET_ID}" \
+      '.properties.workerProfiles += [{"name": $NAME, "vmSize": $VM_SIZE, "diskSizeGB": $DISK_SIZE, "subnetId": $SUBNET_ID, "count": 1}]' > "${TMP_DIR}/config.json.tmp"
+  cp "${TMP_DIR}/config.json.tmp" "${TMP_DIR}/config.json"
+  rm "${TMP_DIR}/config.json.tmp"
+done
 
 if [[ -n "${PULL_SECRET}" ]]; then
   jq --arg PULL_SECRET "${PULL_SECRET}" '.properties.clusterProfile.pullSecret = $PULL_SECRET' "${TMP_DIR}/config.json" > "${TMP_DIR}/config.json.tmp"

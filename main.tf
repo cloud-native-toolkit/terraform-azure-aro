@@ -28,6 +28,7 @@ locals {
     client_secret       = nonsensitive(var.client_secret)
     access_token        = ""
   })
+  pull_secret = var.pull_secret_file != "" ? file(var.pull_secret_file) : var.pull_secret
 }
 
 module setup_clis {
@@ -100,6 +101,7 @@ resource null_resource aro {
       REGION = var.region
       VISIBILITY = local.visibility
       DISK_SIZE = var.disk_size
+      PULL_SECRET = local.pull_secret
     }
   }
 
