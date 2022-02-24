@@ -87,7 +87,7 @@ while [[ ${count} -lt ${WORKER_COUNT} ]]; do
     ${BIN_DIR}/jq \
       --arg NAME "${NAME}" \
       --arg VM_SIZE "${VM_SIZE}" \
-      --arg DISK_SIZE "${DISK_SIZE}" \
+      --argjson DISK_SIZE "${DISK_SIZE}" \
       --arg SUBNET_ID "${WORKER_SUBNET_ID}" \
       '.properties.workerProfiles += [{"name": $NAME, "vmSize": $VM_SIZE, "diskSizeGB": $DISK_SIZE, "subnetId": $SUBNET_ID, "count": 1}]' > "${TMP_DIR}/config.json.tmp"
   cp "${TMP_DIR}/config.json.tmp" "${TMP_DIR}/config.json"
