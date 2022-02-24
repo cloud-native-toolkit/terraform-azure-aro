@@ -40,8 +40,6 @@ mkdir -p "${TMP_DIR}"
 echo "Getting token"
 TOKEN=$(curl -s -X POST -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&resource=https%3A%2F%2Fmanagement.azure.com%2F" "https://login.microsoftonline.com/${TENANT_ID}/oauth2/token" | ${BIN_DIR}/jq -r '.access_token')
 
-echo "Got token: ${TOKEN}"
-
 URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.RedHatOpenshift/openShiftClusters/${CLUSTER_NAME}?api-version=${API_VERSION}"
 
 cat > "${TMP_DIR}/config.json" << EOF
@@ -68,7 +66,7 @@ cat > "${TMP_DIR}/config.json" << EOF
     },
     "workerProfiles": [
       {
-        "name": "${CLUSTER_NAME}-worker",
+        "name": "workers",
         "vmSize": "${VM_SIZE}",
         "diskSizeGB": ${DISK_SIZE},
         "subnetId": "${WORKER_SUBNET_ID}",
