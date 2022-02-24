@@ -70,6 +70,9 @@ module "cluster_rg" {
   region              = var.region
 }
 
+data azurerm_client_config default {
+}
+
 data azurerm_virtual_network vnet {
   depends_on = [null_resource.print_names]
 
@@ -77,8 +80,17 @@ data azurerm_virtual_network vnet {
   resource_group_name = var.resource_group_name
 }
 
+resource azurerm_role_assignment network_contributor {
+  count = var.provision ? 1 : 0
+
+  scope                = data.azurerm_virtual_network.vnet.id
+  role_definition_name = "Network Contributor"
+  principal_id         = data.azurerm_client_config.default.object_id
+}
+
 resource null_resource aro {
   count = var.provision ? 1 : 0
+  depends_on = [azurerm_role_assignment.network_contributor]
 
   triggers = {
     bin_dir = module.setup_clis.bin_dir
