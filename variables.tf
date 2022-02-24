@@ -121,3 +121,9 @@ variable "pull_secret_file" {
   description = "Name of the file containing the pull secret needed to access Red Hat content. The contents can either be provided in this file or directly via the `pull_secret` variable"
   default     = ""
 }
+
+variable "label" {
+  type        = string
+  description = "The label used to generate the cluster name"
+  default     = "cluster"
+}

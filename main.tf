@@ -1,7 +1,7 @@
 locals {
   tmp_dir = "${path.cwd}/.tmp/aro"
   name_prefix = var.name_prefix != null && var.name_prefix != "" ? var.name_prefix : var.resource_group_name
-  cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-cluster"
+  cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
   vnet_id = data.azurerm_virtual_network.vnet.id
   id = data.external.aro.result.id
   cluster_config = "${path.cwd}/.kube/config"

@@ -10,6 +10,7 @@ module "cluster" {
   master_subnet_id = module.master_subnets.ids[0]
   worker_subnet_id = module.worker_subnets.ids[0]
   vpc_name = module.vpc.name
+  label = "cluster2"
 }
 
 resource null_resource kubeconfig {
