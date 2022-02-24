@@ -66,7 +66,7 @@ cat > "${TMP_DIR}/config.json" << EOF
     },
     "workerProfiles": [
       {
-        "name": "workers",
+        "name": "worker",
         "vmSize": "${VM_SIZE}",
         "diskSizeGB": ${DISK_SIZE},
         "subnetId": "${WORKER_SUBNET_ID}",
