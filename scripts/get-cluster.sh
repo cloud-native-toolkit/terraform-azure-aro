@@ -36,7 +36,7 @@ while [[ "${STATE}" == "Creating" ]]; do
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     "${URL}" | \
-    ${BIN_DIR}/jq '{id: .id, name: .name, location: .location, state: .properties.provisioningState, serverUrl: .properties.apiserverProfile.url, publicSubdomain: .properties.clusterProfile.domain, consoleUrl: .properties.consoleProfile.url, errorMessage: .error.message, errorCode: .error.code}' > "${TMP_DIR}/output.json"
+    ${BIN_DIR}/jq '{id: .id, name: .name, location: .location, state: .properties.provisioningState, serverUrl: .properties.apiserverProfile.url, publicSubdomain: .properties.clusterProfile.domain, consoleUrl: .properties.consoleProfile.url, errorMessage: .error.message, errorCode: .error.code, result: .}' > "${TMP_DIR}/output.json"
 
   STATE=$(cat "${TMP_DIR}/output.json" | jq -r ".state")
   if [[ "${STATE}" == "Creating" ]]; then
