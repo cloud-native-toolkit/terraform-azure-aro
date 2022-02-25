@@ -47,11 +47,11 @@ done
 AUTH_URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.RedHatOpenShift/openShiftClusters/${CLUSTER_NAME}/listCredentials?api-version=${API_VERSION}"
 
 if [[ "${STATE}" != "Failed" ]]; then
-curl -s -X POST \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d "" \
-  "${AUTH_URL}" > "${TMP_DIR}/credentials.json"
+  curl -s -X POST \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "" \
+    "${AUTH_URL}" > "${TMP_DIR}/credentials.json"
 else
   echo '{}' > "${TMP_DIR}/credentials.json"
 fi
