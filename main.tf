@@ -85,7 +85,7 @@ resource azurerm_role_assignment network_contributor {
 
   scope                = data.azurerm_virtual_network.vnet.id
   role_definition_name = "Network Contributor"
-  principal_id         = data.azurerm_client_config.default.object_id
+  principal_id         = var.openshift_resource_provider_id
 }
 
 resource null_resource aro {

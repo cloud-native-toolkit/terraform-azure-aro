@@ -11,6 +11,7 @@ module "cluster" {
   worker_subnet_id = module.worker_subnets.ids[0]
   vpc_name = module.vpc.name
   label = "cluster2"
+  openshift_resource_provider_id = var.openshift_resource_provider_id
 }
 
 resource null_resource kubeconfig {

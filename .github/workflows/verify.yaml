@@ -39,6 +39,7 @@ jobs:
           TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
           TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          TF_VAR_openshift_resource_provider_id: ${{ secrets.AZURE_OPENSHIFT_RESOURCE_PROVIDER }}
 #
 #      - name: Verify destroy on ${{ matrix.testcase }}
 #        uses: cloud-native-toolkit/action-module-verify-destroy@main
@@ -50,6 +51,7 @@ jobs:
 #          TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
 #          TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 #          TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+#          TF_VAR_openshift_resource_provider_id: ${{ secrets.AZURE_OPENSHIFT_RESOURCE_PROVIDER }}
 
   verifyMetadata:
     runs-on: ubuntu-latest

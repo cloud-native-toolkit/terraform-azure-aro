@@ -27,3 +27,6 @@ variable "tenant_id" {}
 variable "auth_group_id" {
   default = "1b815526-c372-4fc1-b2fc-3c5a9c670421"
 }
+
+variable "openshift_resource_provider_id" {
+}

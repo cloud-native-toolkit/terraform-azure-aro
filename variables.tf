@@ -127,3 +127,8 @@ variable "label" {
   description = "The label used to generate the cluster name"
   default     = "cluster"
 }
+
+variable "openshift_resource_provider_id" {
+  type        = string
+  description = "The object id of the ARO 4 Resource Provider service principal object id. Can be retrieved by running `az ad sp list --filter \"displayname eq 'Azure Red Hat OpenShift RP'\" --query \"[?appDisplayName=='Azure Red Hat OpenShift RP'].{name: appDisplayName, objectId: objectId}\"`"
+}
