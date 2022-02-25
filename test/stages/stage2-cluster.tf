@@ -10,7 +10,7 @@ module "cluster" {
   master_subnet_id = module.master_subnets.ids[0]
   worker_subnet_id = module.worker_subnets.ids[0]
   vpc_name = module.vpc.name
-  label = "cluster2"
+  label = "cluster3"
   openshift_resource_provider_id = var.openshift_resource_provider_id
 }
 
