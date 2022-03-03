@@ -15,7 +15,7 @@ WORKER_SUBNET_ID="$8"
 DOMAIN="$9"
 
 OPENSHIFT_VERSION="${OPENSHIFT_VERSION:-4.8.11}"
-VM_SIZE="${VM_SIZE:-Standard_D8s_v3}"
+VM_SIZE="${VM_SIZE:-Standard_D4s_v3}"
 MASTER_VM_SIZE="${MASTER_VM_SIZE:-Standard_D8s_v3}"
 
 OS_TYPE="${OS_TYPE:-Linux}"
@@ -51,7 +51,6 @@ cat > "${TMP_DIR}/config.json" << EOF
       "resourceGroupId": "${RESOURCE_GROUP_ID}",
       "domain": "${DOMAIN}"
     },
-    "consoleProfile": {},
     "servicePrincipalProfile": {
       "clientId": "${CLIENT_ID}",
       "clientSecret": "${CLIENT_SECRET}"
