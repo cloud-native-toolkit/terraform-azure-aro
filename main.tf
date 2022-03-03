@@ -12,11 +12,8 @@ locals {
   total_workers = var._count
   visibility = var.disable_public_endpoint ? "Private" : "Public"
   domain = "${random_string.cluster_domain_prefix.result}${random_string.cluster_domain.result}"
-  server_url = lookup(data.external.aro.result, "serverUrl", "")
   ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
   console_url = lookup(data.external.aro.result, "consoleUrl", "")
-  username = lookup(data.external.aro.result, "kubeadminUsername", "")
-  password = lookup(data.external.aro.result, "kubeadminPassword", "")
   aro_data = jsonencode({
     tmp_dir             = local.tmp_dir
     bin_dir             = module.setup_clis.bin_dir
@@ -156,19 +153,17 @@ data external aro {
   }
 }
 
-resource null_resource oc_login {
+data external oc_login {
   depends_on = [data.external.aro]
 
-  triggers = {
-    always = timestamp()
-  }
+  program = ["bash", "${path.module}/scripts/oc-login.sh"]
 
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/login-cluster.sh '${local.server_url}' '${local.username}'"
-
-    environment = {
-      PASSWORD = local.password
-      KUBECONFIG = local.cluster_config
-    }
+  query = {
+    serverUrl = data.external.aro.result.serverUrl
+    username = data.external.aro.result.kubeadminUsername
+    password = data.external.aro.result.kubeadminPassword
+    token = ""
+    kube_config = local.cluster_config
+    tmp_dir = local.tmp_dir
   }
 }
