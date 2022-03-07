@@ -53,11 +53,8 @@ if [[ "${STATE}" != "Failed" ]]; then
     -d "" \
     "${AUTH_URL}" > "${TMP_DIR}/credentials.json"
 else
-  echo '{}' > "${TMP_DIR}/credentials.json"
+  cat "${TMP_DIR}/output.json" >&2
+  exit 1
 fi
 
 jq -s '.[0] * .[1]' "${TMP_DIR}/output.json" "${TMP_DIR}/credentials.json"
-
-if [[ "${STATE}" == "Failed" ]]; then
-  exit 1
-fi
