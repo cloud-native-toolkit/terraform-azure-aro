@@ -23,14 +23,14 @@ output "region" {
 output "config_file_path" {
   value       = local.cluster_config
   description = "Path to the config file for the cluster."
-  depends_on  = [null_resource.oc_login]
+  depends_on  = [data.external.oc_login]
 }
 
 output "platform" {
   value = {
     id         = data.external.aro.result.id
     kubeconfig = local.cluster_config
-    server_url = local.server_url
+    server_url = data.external.aro.result.serverUrl
     type       = local.cluster_type
     type_code  = local.cluster_type_code
     version    = local.cluster_version
@@ -39,7 +39,7 @@ output "platform" {
   }
   sensitive = true
   description = "Configuration values for the cluster platform"
-  depends_on  = [null_resource.oc_login]
+  depends_on  = [data.external.oc_login]
 }
 
 output "sync" {

@@ -154,7 +154,6 @@ data external aro {
 }
 
 data external oc_login {
-  depends_on = [data.external.aro]
 
   program = ["bash", "${path.module}/scripts/oc-login.sh"]
 
