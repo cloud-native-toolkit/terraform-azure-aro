@@ -37,65 +37,25 @@ mkdir -p "${TMP_DIR}"
 
 #PULL_SECRET=""
 
-echo "Getting token"
-TOKEN=$(curl -s -X POST -d "grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&resource=https%3A%2F%2Fmanagement.azure.com%2F" "https://login.microsoftonline.com/${TENANT_ID}/oauth2/token" | ${BIN_DIR}/jq -r '.access_token')
-
-URL="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.RedHatOpenshift/openShiftClusters/${CLUSTER_NAME}?api-version=${API_VERSION}"
-
-cat > "${TMP_DIR}/config.json" << EOF
-{
-  "location": "${REGION}",
-  "tags": {},
-  "properties": {
-    "clusterProfile": {
-      "resourceGroupId": "${RESOURCE_GROUP_ID}",
-      "domain": "${DOMAIN}"
-    },
-    "servicePrincipalProfile": {
-      "clientId": "${CLIENT_ID}",
-      "clientSecret": "${CLIENT_SECRET}"
-    },
-    "networkProfile": {
-      "podCidr": "10.128.0.0/14",
-      "serviceCidr": "172.30.0.0/16"
-    },
-    "masterProfile": {
-      "vmSize": "${MASTER_VM_SIZE}",
-      "subnetId": "${MASTER_SUBNET_ID}"
-    },
-    "workerProfiles": [
-      {
-        "name": "worker",
-        "vmSize": "${VM_SIZE}",
-        "diskSizeGB": ${DISK_SIZE},
-        "subnetId": "${WORKER_SUBNET_ID}",
-        "count": ${WORKER_COUNT}
-      }
-    ],
-    "apiserverProfile": {
-      "visibility": "${VISIBILITY}"
-    },
-    "ingressProfiles": [
-      {
-        "name": "default",
-        "visibility": "${VISIBILITY}"
-      }
-    ]
-  }
-}
-EOF
-
+PULL_SECRET_ARG=""
 if [[ -n "${PULL_SECRET}" ]]; then
-  jq --arg PULL_SECRET "${PULL_SECRET}" '.properties.clusterProfile.pullSecret = $PULL_SECRET' "${TMP_DIR}/config.json" > "${TMP_DIR}/config.json.tmp"
-  cp "${TMP_DIR}/config.json.tmp" "${TMP_DIR}/config.json"
-  rm "${TMP_DIR}/config.json.tmp"
+  PULL_SECRET_ARG="--pull-secret '${PULL_SECRET}'"
 fi
 
-OUTPUT=$(curl -s -X PUT \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  "${URL}" \
-  --data-binary "@${TMP_DIR}/config.json")
+az provider register -n Microsoft.RedHatOpenShift --wait
+az provider register -n Microsoft.Compute --wait
+az provider register -n Microsoft.Storage --wait
+az provider register -n Microsoft.Authorization --wait
 
-echo "$OUTPUT"
+az account set --subscription "${SUBSCRIPTION_ID}"
 
+az login --service-principal -u "${CLIENT_ID}" -p "${CLIENT_SECRET}" -t "${TENANT_ID}"
+
+az aro create \
+  --resource-group "${RESOURCE_GROUP_NAME}" \
+  --name "${CLUSTER_NAME}" \
+  --master-subnet "${MASTER_SUBNET_ID}" \
+  --worker-subnet "${WORKER_SUBNET_ID}" \
+  --apiserver-visibility "${VISIBILITY}" \
+  --ingress-visibility "${VISIBILITY}" \
+  --worker-count "${WORKER_COUNT}" ${PULL_SECRET_ARG}
