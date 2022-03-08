@@ -42,16 +42,17 @@ if [[ -n "${PULL_SECRET}" ]]; then
   PULL_SECRET_ARG="--pull-secret '${PULL_SECRET}'"
 fi
 
-az provider register -n Microsoft.RedHatOpenShift --wait
-az provider register -n Microsoft.Compute --wait
-az provider register -n Microsoft.Storage --wait
-az provider register -n Microsoft.Authorization --wait
+echo "Logging in with service principal. client-id=${CLIENT_ID}, tenant-id=${TENANT_ID}"
+az login --service-principal -u "${CLIENT_ID}" -p "${CLIENT_SECRET}" -t "${TENANT_ID}"
 
 echo "Setting subscription id: ${SUBSCRIPTION_ID}"
 az account set --subscription "${SUBSCRIPTION_ID}"
 
-echo "Logging in with service principal. client-id=${CLIENT_ID}, tenant-id=${TENANT_ID}"
-az login --service-principal -u "${CLIENT_ID}" -p "${CLIENT_SECRET}" -t "${TENANT_ID}"
+echo "Registering providers"
+az provider register -n Microsoft.RedHatOpenShift --wait
+az provider register -n Microsoft.Compute --wait
+az provider register -n Microsoft.Storage --wait
+az provider register -n Microsoft.Authorization --wait
 
 echo "Creating cluster: resource-group=${RESOURCE_GROUP_NAME}, name=${CLUSTER_NAME}"
 az aro create \
