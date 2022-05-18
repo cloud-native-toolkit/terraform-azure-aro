@@ -6,12 +6,12 @@ INPUT=$(tee)
 
 BIN_DIR=$(echo "${INPUT}" | grep "bin_dir" | sed -E 's/.*"bin_dir": ?"([^"]+)".*/\1/g')
 
-echo "Bin dir: ${BIN_DIR}"
-echo "Input: ${INPUT}"
+#echo "Bin dir: ${BIN_DIR}"
+#echo "Input: ${INPUT}"
 
 eval "$(echo "${INPUT}" | ${BIN_DIR}/jq -r '@sh "CLUSTER_NAME=\(.cluster_name) RESOURCE_GROUP_NAME=\(.resource_group_name) SUBSCRIPTION_ID=\(.subscription_id) TENANT_ID=\(.tenant_id) CLIENT_ID=\(.client_id) CLIENT_SECRET=\(.client_secret) TOKEN=\(.access_token) TMP_DIR=\(.tmp_dir)"')"
 
-echo "SUBSCRIPTION_ID=${SUBSCRIPTION_ID}, RESOURCE_GROUP_NAME=${RESOURCE_GROUP_NAME}"
+#echo "SUBSCRIPTION_ID=${SUBSCRIPTION_ID}, RESOURCE_GROUP_NAME=${RESOURCE_GROUP_NAME}"
 
 API_VERSION="2020-04-30"
 
@@ -57,4 +57,11 @@ else
   exit 1
 fi
 
-jq -s '.[0] * .[1]' "${TMP_DIR}/output.json" "${TMP_DIR}/credentials.json"
+#jq -s '.[0] * .[1]' "${TMP_DIR}/output.json" "${TMP_DIR}/credentials.json"
+
+# Terraform external data output can only be a single layer JSON so need to extract values from output.json
+ID=$(cat "${TMP_DIR}/output.json" | jq -r ".id")
+URL=$(cat "${TMP_DIR}/output.json" | jq -r ".serverUrl")
+USER=$(cat "${TMP_DIR}/credentials.json" | jq -r ".kubeadminUsername")
+PWD=$(cat "${TMP_DIR}/credentials.json" | jq -r ".kubeadminPassword")
+jq --null-input --arg id "${ID}" --arg url "${URL}" --arg user "${USER}" --arg pwd "${PWD}" '{"id": $id, "serverUrl": $url, "kubeadminUsername": $user, "kubeadminPassword": $pwd}'

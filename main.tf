@@ -153,9 +153,10 @@ data external aro {
   }
 }
 
+/*
 data external oc_login {
 
-  program = ["bash", "${path.module}/scripts/oc-login.sh"]
+  program = ["bash", "${path.module}/scripts/login-cluster.sh"]
 
   query = {
     serverUrl = data.external.aro.result.serverUrl
@@ -166,3 +167,5 @@ data external oc_login {
     tmp_dir = local.tmp_dir
   }
 }
+*/
+

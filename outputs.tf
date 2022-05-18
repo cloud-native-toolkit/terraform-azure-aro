@@ -20,6 +20,7 @@ output "region" {
   depends_on  = [data.external.aro]
 }
 
+/*
 output "config_file_path" {
   value       = local.cluster_config
   description = "Path to the config file for the cluster."
@@ -41,6 +42,7 @@ output "platform" {
   description = "Configuration values for the cluster platform"
   depends_on  = [data.external.oc_login]
 }
+*/
 
 output "sync" {
   value = local.cluster_name
