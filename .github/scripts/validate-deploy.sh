@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-echo "Implement validation logic"
-exit 1
+export KUBECONFIG=$(cat .kubeconfig)
+
+oc get nodes
