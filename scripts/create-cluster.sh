@@ -43,8 +43,8 @@ if [[ -n "${PULL_SECRET}" ]]; then
 fi
 
 # Unable to perform the below as the service principal would require AAD access since ARO creates a new service principal
-#echo "Logging in with service principal. client-id=${CLIENT_ID}, tenant-id=${TENANT_ID}"
-#az login --service-principal -u "${CLIENT_ID}" -p "${CLIENT_SECRET}" -t "${TENANT_ID}"
+echo "Logging in with service principal. client-id=${CLIENT_ID}, tenant-id=${TENANT_ID}"
+az login --service-principal -u "${CLIENT_ID}" -p "${CLIENT_SECRET}" -t "${TENANT_ID}"
 
 echo "Setting subscription id: ${SUBSCRIPTION_ID}"
 az account set --subscription "${SUBSCRIPTION_ID}"

@@ -4,7 +4,7 @@ locals {
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
   vnet_id = data.azurerm_virtual_network.vnet.id
   id = data.external.aro.result.id
-  cluster_config = "${path.cwd}/.kube/config"
+  cluster_config = "${path.cwd}/.kube/config" 
   cluster_type = "openshift"
   cluster_type_code = "ocp4"
   cluster_version = var.openshift_version
@@ -67,6 +67,8 @@ module "cluster_rg" {
   region              = var.region
 }
 
+// Create service principal with contributor access
+
 data azurerm_client_config default {
 }
 
@@ -77,17 +79,17 @@ data azurerm_virtual_network vnet {
   resource_group_name = var.resource_group_name
 }
 
-resource azurerm_role_assignment network_contributor {
-  count = var.provision ? 1 : 0
+# resource azurerm_role_assignment network_contributor {
+#   count = var.provision ? 1 : 0
 
-  scope                = data.azurerm_virtual_network.vnet.id
-  role_definition_name = "Network Contributor"
-  principal_id         = var.openshift_resource_provider_id
-}
+#   scope                = data.azurerm_virtual_network.vnet.id
+#   role_definition_name = "Network Contributor"
+#   principal_id         = var.client_id
+# }
 
 resource null_resource aro {
   count = var.provision ? 1 : 0
-  depends_on = [azurerm_role_assignment.network_contributor]
+  depends_on = [data.azurerm_virtual_network.vnet]
 
   triggers = {
     bin_dir = module.setup_clis.bin_dir
@@ -135,7 +137,7 @@ resource null_resource aro {
   }
 }
 
-data external aro {
+data "external" "aro" {
   depends_on = [null_resource.aro]
 
   program = ["bash", "${path.module}/scripts/get-cluster.sh"]
@@ -153,19 +155,15 @@ data external aro {
   }
 }
 
-/*
-data external oc_login {
-
-  program = ["bash", "${path.module}/scripts/login-cluster.sh"]
+data "external" "login" {
+  program = ["bash","${path.module}/scripts/login-cluster.sh"]
 
   query = {
-    serverUrl = data.external.aro.result.serverUrl
+    bin_dir = module.setup_clis.bin_dir
+    kubeconfig = local.cluster_config
     username = data.external.aro.result.kubeadminUsername
     password = data.external.aro.result.kubeadminPassword
-    token = ""
-    kube_config = local.cluster_config
-    tmp_dir = local.tmp_dir
+    server_url = data.external.aro.result.serverUrl
   }
 }
-*/
 

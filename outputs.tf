@@ -20,11 +20,26 @@ output "region" {
   depends_on  = [data.external.aro]
 }
 
-/*
 output "config_file_path" {
   value       = local.cluster_config
   description = "Path to the config file for the cluster."
-  depends_on  = [data.external.oc_login]
+  depends_on  = [data.external.login]
+}
+
+output "token" {
+  value = data.external.login.result.token
+  description = "CLI login token for cluster"
+}
+
+output "username" {
+  value = data.external.aro.result.kubeadminUsername
+  description = "Login username"
+}
+
+output "password" {
+  value = data.external.aro.result.kubeadminPassword
+  description = "Login password"
+  sensitive = true
 }
 
 output "platform" {
@@ -40,9 +55,8 @@ output "platform" {
   }
   sensitive = true
   description = "Configuration values for the cluster platform"
-  depends_on  = [data.external.oc_login]
+  depends_on  = [data.external.login]
 }
-*/
 
 output "sync" {
   value = local.cluster_name
