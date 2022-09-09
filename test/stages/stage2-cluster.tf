@@ -3,10 +3,10 @@ module "cluster" {
 
   name_prefix           = local.name_prefix
   
-  subscription_id       = var.azure_subscription_id
-  tenant_id             = var.azure_tenant_id
-  client_id             = var.service_principal_id
-  client_secret         = var.service_principal_secret
+  subscription_id       = var.subscription_id
+  tenant_id             = var.tenant_id
+  client_id             = var.client_id
+  client_secret         = var.client_secret
 
   resource_group_name   = module.resource_group.name
   region                = module.resource_group.region
