@@ -12,6 +12,6 @@ module "cluster" {
   region                = module.resource_group.region
   vnet_name             = module.vnet.name
   master_subnet_id      = module.master-subnet.id
-  worker_subent_id      = module.worker-subnet.id
+  worker_subnet_id      = module.worker-subnet.id
 }
 
