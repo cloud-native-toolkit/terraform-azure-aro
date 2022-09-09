@@ -3,6 +3,6 @@ module "vnet" {
 
   resource_group_name = module.resource_group.name
   region              = module.resource_group.region
-  name_prefix         = var.name_prefix
+  name_prefix         = local.name_prefix
   address_prefixes    = ["${var.vnet_cidr}"]
 }

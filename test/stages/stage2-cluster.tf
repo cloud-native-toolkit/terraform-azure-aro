@@ -1,7 +1,7 @@
 module "cluster" {
   source = "./module"
 
-  name_prefix           = var.name_prefix
+  name_prefix           = local.name_prefix
   
   subscription_id       = var.azure_subscription_id
   tenant_id             = var.azure_tenant_id
