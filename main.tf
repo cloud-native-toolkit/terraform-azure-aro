@@ -29,14 +29,14 @@ locals {
 }
 
 module setup_clis {
-  source = "github.com/cloud-native-toolkit/terraform-util-clis.git"
+  source = "github.com/cloud-native-toolkit/terraform-util-clis.git?ref=v1.16.9"
 
   clis = ["jq"]
 }
 
 resource null_resource print_names {
   provisioner "local-exec" {
-    command = "echo 'VPC name: ${var.vpc_name}'"
+    command = "echo 'VNet name: ${var.vnet_name}'"
   }
   provisioner "local-exec" {
     command = "echo 'Resource group name: ${var.resource_group_name}'"
@@ -60,14 +60,12 @@ resource random_string cluster_domain {
 }
 
 module "cluster_rg" {
-  source = "github.com/cloud-native-toolkit/terraform-azure-resource-group"
+  source = "github.com/cloud-native-toolkit/terraform-azure-resource-group?ref=v1.1.1"
   count = var.provision ? 1 : 0
 
   resource_group_name = "aro-${local.domain}"
   region              = var.region
 }
-
-// Create service principal with contributor access
 
 data azurerm_client_config default {
 }
@@ -75,17 +73,9 @@ data azurerm_client_config default {
 data azurerm_virtual_network vnet {
   depends_on = [null_resource.print_names]
 
-  name                = var.vpc_name
+  name                = var.vnet_name
   resource_group_name = var.resource_group_name
 }
-
-# resource azurerm_role_assignment network_contributor {
-#   count = var.provision ? 1 : 0
-
-#   scope                = data.azurerm_virtual_network.vnet.id
-#   role_definition_name = "Network Contributor"
-#   principal_id         = var.client_id
-# }
 
 resource null_resource aro {
   count = var.provision ? 1 : 0
