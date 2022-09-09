@@ -2,7 +2,7 @@ locals {
   subnet_cidrs       = cidrsubnets(var.vnet_cidr, 2, 2)
 }
 
-module "master_subnet" {
+module "master-subnet" {
   source = "github.com/cloud-native-toolkit/terraform-azure-subnets"
 
   region              = module.resource_group.region
@@ -14,7 +14,7 @@ module "master_subnet" {
   service_endpoints   = ["Microsoft.ContainerRegistry","Microsoft.Storage"]
 }
 
-module "worker_subnet" {
+module "worker-subnet" {
   source = "github.com/cloud-native-toolkit/terraform-azure-subnets"
 
   region              = module.resource_group.region
