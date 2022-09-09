@@ -42,6 +42,11 @@ output "password" {
   sensitive = true
 }
 
+output "serverURL" {
+  value = data.external.aro.result.serverUrl
+  description = "The url used to connect to the API of the cluster"
+}
+
 output "platform" {
   value = {
     id         = data.external.aro.result.id
