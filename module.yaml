@@ -1,11 +1,71 @@
 name: azure-aro
 type: terraform
-description: Module to provision aro on azure
+description: Module to provision Azure RedHat OpenShift on azure
 tags:
-  - tools
-  - devops
+  - azure
+  - cluster
 versions:
-  - platforms: []
-    dependencies: []
-    variables: []
+  - platforms: 
+    - ocp4
+    dependencies: 
+    - id: vnet
+      refs:
+      - source: github.com/cloud-native-toolkit/terraform-azure-vnet
+        version: ">= 1.1.3"
+    - id: master-subnet
+      refs:
+      - source: github.com/cloud-native-toolkit/terraform-azure-subnets
+        version: ">= 1.3.7"
+    - id: worker-subnet
+      refs:
+      - source: github.com/cloud-native-toolkit/terraform-azure-subnets
+        version: ">= 1.3.7"
+    variables: 
+    - name: resource_group_name
+      scope: global
+      important: true
+    - name: region
+      scope: global
+      important: true
+    - name: subscription_id
+      scope: global
+      important: true
+    - name: tenant_id
+      scope: global
+      important: true
+    - name: client_id
+      scope: global
+      important: true
+    - name: client_secret
+      scope: global
+      important: true
+    - name: vnet_name
+      moduleRef:
+        id: vnet
+        output: name
+    - name: master_subnet_id
+      moduleRef:
+        id: master-subnet
+        output: id
+    - name: worker_subnet_id
+      moduleRef: 
+        id: worker-subnet
+        output: id
+    outputs:
+    - name: id
+      description: "ID of the created cluster"
+    - name: name
+      description: "Name of the cluster"
+    - name: config_file_path
+      description: "Path to the config file for the cluster"
+    - name: serverURL
+      description: "The URL used to connect to the API of the cluster"
+    - name: username
+      description: "Username for the cluster"
+    - name: password
+      description: "Password for the cluster"
+    - name: token
+      description: "Login token for the cluster"
+    - name: platform
+      description: "Configuration values for the created cluster platform"
 cloudProvider: azure
