@@ -45,6 +45,7 @@ Functionality to support using your own user will be provided in a future releas
 
 ## Example Usage
 
+```hcl-terraform
 module "resource_group" {
   source = "github.com/cloud-native-toolkit/terraform-azure-resource-group"
 
@@ -101,6 +102,7 @@ module "aro" {
   master_subnet_id      = module.master-subnet.id
   worker_subent_id      = module.worker-subnet.id
 }
+```
 
 ## Variables
 
