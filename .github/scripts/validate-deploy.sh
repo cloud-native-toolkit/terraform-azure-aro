@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-export KUBECONFIG=$(cat .kubeconfig)
+export KUBECONFIG=$(terraform output -raw config_file_path)
 
 oc get nodes
