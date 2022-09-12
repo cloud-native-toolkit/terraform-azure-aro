@@ -55,6 +55,14 @@ az provider register -n Microsoft.Compute --wait
 az provider register -n Microsoft.Storage --wait
 az provider register -n Microsoft.Authorization --wait
 
+## To do
+# Add cluster resource group
+# Remove unused variables in main when calling (e.g. version, auth group)
+# Add tags
+# Add encryption option for standard
+# Add fips option
+# Add domain option
+
 echo "Creating cluster: resource-group=${RESOURCE_GROUP_NAME}, name=${CLUSTER_NAME}"
 az aro create \
   --resource-group "${RESOURCE_GROUP_NAME}" \
@@ -66,4 +74,7 @@ az aro create \
   --ingress-visibility "${VISIBILITY}" \
   --worker-count "${WORKER_COUNT}" ${PULL_SECRET_ARG} \
   --client-id "${CLIENT_ID}" \
-  --client-secret "${CLIENT_SECRET}"
+  --client-secret "${CLIENT_SECRET}" \
+  --worker-vm-size "${VM_SIZE}" \
+  --worker-vm-disk-size-gb "${DISK_SIZE}" \
+  --master-vm-size "${MASTER_VM_SIZE}"

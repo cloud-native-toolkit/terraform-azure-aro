@@ -145,6 +145,14 @@ data "external" "aro" {
   }
 }
 
+resource "time_sleep" "wait_for_cluster" {
+  depends_on = [
+    data.external.aro
+  ]
+
+  create_duration = "2m"
+}
+
 data "external" "login" {
   program = ["bash","${path.module}/scripts/login-cluster.sh"]
 
