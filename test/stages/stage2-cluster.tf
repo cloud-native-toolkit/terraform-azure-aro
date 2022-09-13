@@ -15,3 +15,7 @@ module "cluster" {
   worker_subnet_id      = module.worker-subnet.id
 }
 
+output "config_file_path" {
+  value = module.cluster.config_file_path
+}
+
