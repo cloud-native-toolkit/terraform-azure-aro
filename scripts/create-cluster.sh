@@ -62,6 +62,7 @@ az provider register -n Microsoft.Authorization --wait
 # Add encryption option for standard
 # Add fips option
 # Add domain option
+# Add service prinicpal creation, use and deletion
 
 echo "Creating cluster: resource-group=${RESOURCE_GROUP_NAME}, name=${CLUSTER_NAME}"
 az aro create \
@@ -73,8 +74,6 @@ az aro create \
   --apiserver-visibility "${VISIBILITY}" \
   --ingress-visibility "${VISIBILITY}" \
   --worker-count "${WORKER_COUNT}" ${PULL_SECRET_ARG} \
-  --client-id "${CLIENT_ID}" \
-  --client-secret "${CLIENT_SECRET}" \
   --worker-vm-size "${VM_SIZE}" \
   --worker-vm-disk-size-gb "${DISK_SIZE}" \
   --master-vm-size "${MASTER_VM_SIZE}"
