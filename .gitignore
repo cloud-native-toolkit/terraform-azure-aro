@@ -3,3 +3,6 @@
 terraform.tfstate
 terraform.tfstate.backup
 .terraform/
+.tmp/
+input.json
+.terraform.lock.hcl

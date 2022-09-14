@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-echo "Implement validation logic"
-exit 1
+export KUBECONFIG="$(terraform output -raw config_file_path)"
+
+oc get nodes
