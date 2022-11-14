@@ -69,6 +69,7 @@ az aro create \
   --resource-group "${RESOURCE_GROUP_NAME}" \
   --name "${CLUSTER_NAME}" \
   --location "${REGION}" \
+  --subscription "${SUBSCRIPTION_ID}" \
   --master-subnet "${MASTER_SUBNET_ID}" \
   --worker-subnet "${WORKER_SUBNET_ID}" \
   --apiserver-visibility "${VISIBILITY}" \
