@@ -39,12 +39,6 @@ variable "worker_subnet_id" {
   description = "The id of the subnet where the worker nodes will be placed"
 }
 
-variable "openshift_version" {
-  type        = string
-  description = "The version of the openshift cluster"
-  default     = "4.8.11"
-}
-
 variable "vnet_name" {
   type        = string
   description = "The name of the VNet"

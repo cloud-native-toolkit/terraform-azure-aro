@@ -101,7 +101,6 @@ resource null_resource aro {
       TENANT_ID = self.triggers.tenant_id
       CLIENT_ID = self.triggers.client_id
       CLIENT_SECRET = nonsensitive(self.triggers.client_secret)
-      OPENSHIFT_VERSION = var.openshift_version
       VM_SIZE = var.flavor
       MASTER_VM_SIZE = var.master_flavor
       OS_TYPE = var.os_type
