@@ -105,7 +105,6 @@ resource null_resource aro {
       MASTER_VM_SIZE = var.master_flavor
       OS_TYPE = var.os_type
       WORKER_COUNT = var._count
-      AUTH_GROUP_ID= var.auth_group_id
       REGION = var.region
       VISIBILITY = local.visibility
       DISK_SIZE = var.disk_size

@@ -86,12 +86,6 @@ variable "name_prefix" {
   default     = ""
 }
 
-variable "auth_group_id" {
-  type        = string
-  description = "The id of the auth group for cluster admins"
-  default     = ""
-}
-
 variable "disable_public_endpoint" {
   type        = bool
   description = "Flag to make the cluster private only"
