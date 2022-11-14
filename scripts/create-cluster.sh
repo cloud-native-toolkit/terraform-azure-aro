@@ -37,9 +37,10 @@ mkdir -p "${TMP_DIR}"
 
 #PULL_SECRET=""
 
-PULL_SECRET_ARG=""
 if [[ -n "${PULL_SECRET}" ]]; then
   PULL_SECRET_ARG="--pull-secret ${PULL_SECRET}"
+else
+  PULL_SECRET_ARG=""
 fi
 
 # Unable to perform the below as the service principal would require AAD access since ARO creates a new service principal
