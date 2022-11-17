@@ -39,12 +39,6 @@ variable "worker_subnet_id" {
   description = "The id of the subnet where the worker nodes will be placed"
 }
 
-variable "openshift_version" {
-  type        = string
-  description = "The version of the openshift cluster"
-  default     = "4.8.11"
-}
-
 variable "vnet_name" {
   type        = string
   description = "The name of the VNet"
@@ -92,12 +86,6 @@ variable "name_prefix" {
   default     = ""
 }
 
-variable "auth_group_id" {
-  type        = string
-  description = "The id of the auth group for cluster admins"
-  default     = ""
-}
-
 variable "disable_public_endpoint" {
   type        = bool
   description = "Flag to make the cluster private only"
@@ -126,5 +114,23 @@ variable "label" {
   type        = string
   description = "The label used to generate the cluster name"
   default     = "cluster"
+}
+
+variable "encrypt" {
+  type        = bool
+  description = "Flag to encrypt the VM disks (default = false)"
+  default     = false
+}
+
+variable "key_vault_name" {
+  type = string
+  description = "Name of existing key vault to use (default = \"\")"
+  default = ""
+}
+
+variable "enable_purge" {
+  type        = bool
+  description = "Flag to enable resources to be automatically deleted. Mainly used in automated testing. (Default = false)"
+  default     = false
 }
 

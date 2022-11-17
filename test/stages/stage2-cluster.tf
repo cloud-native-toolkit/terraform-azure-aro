@@ -13,6 +13,9 @@ module "cluster" {
   vnet_name             = module.vnet.name
   master_subnet_id      = module.master-subnet.id
   worker_subnet_id      = module.worker-subnet.id
+
+  encrypt               = true
+  enable_purge          = true
 }
 
 output "config_file_path" {
