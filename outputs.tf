@@ -54,7 +54,7 @@ output "platform" {
     server_url = data.external.aro.result.serverUrl
     type       = local.cluster_type
     type_code  = local.cluster_type_code
-    version    = local.cluster_version
+    # version    = local.cluster_version    # This needs to be added to the data query on the cluster
     ingress    = local.ingress_hostname
     tls_secret = local.tls_secret
   }

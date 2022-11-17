@@ -116,3 +116,21 @@ variable "label" {
   default     = "cluster"
 }
 
+variable "encrypt" {
+  type        = bool
+  description = "Flag to encrypt the VM disks (default = false)"
+  default     = false
+}
+
+variable "key_vault_name" {
+  type = string
+  description = "Name of existing key vault to use (default = \"\")"
+  default = ""
+}
+
+variable "enable_purge" {
+  type        = bool
+  description = "Flag to enable resources to be automatically deleted. Mainly used in automated testing. (Default = false)"
+  default     = false
+}
+
