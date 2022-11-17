@@ -69,6 +69,183 @@ versions:
         moduleRef:
           id: worker-subnet
           output: id
+      - name: vnet_name
+        type: string
+        description: The name of the VNet
+        moduleRef:
+          id: vnet
+          output: name
+      - name: master_flavor
+        type: string
+        description: The size of the VMs for the master nodes
+        default: Standard_D8s_v3
+      - name: flavor
+        type: string
+        description: The size of the VMs for the worker nodes
+        default: Standard_D4s_v3
+      - name: _count
+        type: number
+        description: The number of compute worker nodes
+        default: '3'
+      - name: os_type
+        type: string
+        description: The type of os for the master and worker nodes
+        default: Linux
+      - name: provision
+        type: bool
+        description: >-
+          Flag indicating the cluster should be provisioned. If the value is
+          false then an existing cluster will be looked up
+        default: true
+      - name: name
+        type: string
+        description: >-
+          The name of the ARO cluster. If empty the name will be derived from
+          the name prefix
+        default: ''
+      - name: name_prefix
+        type: string
+        description: >-
+          The prefix name for the service. If not provided it will default to
+          the resource group name
+        default: ''
+      - name: disable_public_endpoint
+        type: bool
+        description: Flag to make the cluster private only
+        default: false
+      - name: disk_size
+        type: number
+        description: The size in GB of the disk for each worker node
+        default: '128'
+      - name: pull_secret
+        type: string
+        description: >-
+          The contents of the pull secret needed to access Red Hat content. The
+          contents can either be provided directly or passed through the
+          `pull_secret_file` variable
+        default: ''
+      - name: pull_secret_file
+        type: string
+        description: >-
+          Name of the file containing the pull secret needed to access Red Hat
+          content. The contents can either be provided in this file or directly
+          via the `pull_secret` variable
+        default: ''
+      - name: label
+        type: string
+        description: The label used to generate the cluster name
+        default: cluster
+      - name: encrypt
+        type: bool
+        description: Flag to encrypt the VM disks (default = false)
+        default: false
+      - name: key_vault_name
+        type: string
+        description: Name of existing key vault to use (default = \"\")
+        default: ''
+      - name: enable_purge
+        type: bool
+        description: >-
+          Flag to enable resources to be automatically deleted. Mainly used in
+          automated testing. (Default = false)
+        default: false
+    outputs:
+      - name: id
+        description: ID of the created cluster
+      - name: name
+        description: Name of the cluster
+      - name: resource_group_name
+        description: Name of the resource group containing the cluster.
+      - name: region
+        description: Region containing the cluster.
+      - name: config_file_path
+        description: Path to the config file for the cluster
+      - name: token
+        description: Login token for the cluster
+      - name: username
+        description: Username for the cluster
+      - name: password
+        description: Password for the cluster
+        sensitive: true
+      - name: serverURL
+        description: The URL used to connect to the API of the cluster
+      - name: platform
+        type:
+          lines:
+            - local.cluster_type
+        sensitive: true
+        description: Configuration values for the created cluster platform
+      - name: sync
+        description: Value used to sync downstream modules
+      - name: total_worker_count
+        description: >-
+          The total number of workers for the cluster. (subnets * number of
+          workers)
+    version: v1.0.1
+  - platforms:
+      - ocp4
+    dependencies:
+      - id: resource-group
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-azure-resource-group
+            version: '>= 1.0.0'
+      - id: vnet
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-azure-vnet
+            version: '>= 1.1.3'
+      - id: master-subnet
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-azure-subnets
+            version: '>= 1.3.7'
+      - id: worker-subnet
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-azure-subnets
+            version: '>= 1.3.7'
+    variables:
+      - name: resource_group_name
+        type: string
+        description: The name of the resource group where the cluster will be provisioned
+        moduleRef:
+          id: resource-group
+          output: name
+      - name: subscription_id
+        type: string
+        description: The id of the subscription where the cluster will be provisioned
+        scope: global
+        important: true
+      - name: tenant_id
+        type: string
+        description: The id of the tenant within the subscription to provision the cluster
+        scope: global
+        important: true
+      - name: client_id
+        type: string
+        description: The client_id or username to access the tenant
+        scope: global
+        important: true
+      - name: client_secret
+        type: string
+        description: The secret used to access the tenant
+        sensitive: true
+        scope: global
+        important: true
+      - name: region
+        type: string
+        description: The location where the cluster should be provisioned
+        scope: global
+        important: true
+      - name: master_subnet_id
+        type: string
+        description: The id of the subnet where the master nodes will be placed
+        moduleRef:
+          id: master-subnet
+          output: id
+      - name: worker_subnet_id
+        type: string
+        description: The id of the subnet where the worker nodes will be placed
+        moduleRef:
+          id: worker-subnet
+          output: id
       - name: openshift_version
         type: string
         description: The version of the openshift cluster
