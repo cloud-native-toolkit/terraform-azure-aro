@@ -262,4 +262,9 @@ resource "azapi_resource" "aro_cluster" {
       tags
     ]
   }
+
+  timeouts {
+    create = "60m"
+    delete = "30m"
+  }
 }
