@@ -50,13 +50,13 @@ variable "master_flavor" {
   default     = "Standard_D8s_v3"
 }
 
-variable "flavor" {
+variable "worker_flavor" {
   type        = string
   description = "The size of the VMs for the worker nodes"
   default     = "Standard_D4s_v3"
 }
 
-variable "_count" {
+variable "worker_count" {
   type        = number
   description = "The number of compute worker nodes"
   default     = 3
@@ -92,7 +92,7 @@ variable "disable_public_endpoint" {
   default     = false
 }
 
-variable "disk_size" {
+variable "worker_disk_size" {
   type        = number
   description = "The size in GB of the disk for each worker node"
   default     = 128
@@ -122,15 +122,26 @@ variable "encrypt" {
   default     = false
 }
 
-variable "key_vault_name" {
-  type = string
-  description = "Name of existing key vault to use (default = \"\")"
-  default = ""
+variable "pod_cidr" {
+  type        = string
+  description = "CIDR for the POD subnet (default = \"10.128.0.0/14\")"
+  default     = "10.128.0.0/14"
 }
 
-variable "enable_purge" {
+variable "service_cidr" {
+  type        = string
+  description = "CIDR for the services subnet (default = \"172.30.0.0/16\")"
+  default     = "172.30.0.0/16"
+}
+variable "fips" {
   type        = bool
-  description = "Flag to enable resources to be automatically deleted. Mainly used in automated testing. (Default = false)"
+  description = "Flag to determine if FIPS validated modules should be utilized (default = false)"
   default     = false
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "List of tags to be included as \"name\":\"value\" pairs (default = {})"
+  default     = {}
 }
 

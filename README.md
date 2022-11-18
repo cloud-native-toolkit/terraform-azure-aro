@@ -11,12 +11,13 @@ Module creates an Azure RedHat OpenShift (ARO) cluster. It includes the followin
 ### Software dependencies
 
 - terraform CLI >= 1.2.6
-- Azure CLI (az) >= 2.39.0
+- Azure CLI (az) >= 2.42.0 (must be in the path environment variable)
 
 ### Terraform providers
 
 - Terraform >= 0.15.0
-- Azure provider >= 3.0.0
+- Azure provider (azurerm) >= 3.3.0
+- Azure API provider (azapi) >= 1.0.0
 
 ### Module dependencies
 
