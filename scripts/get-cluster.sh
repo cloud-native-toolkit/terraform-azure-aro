@@ -62,6 +62,15 @@ fi
 # Terraform external data output can only be a single layer JSON so need to extract values from output.json
 ID=$(cat "${TMP_DIR}/output.json" | jq -r ".id")
 URL=$(cat "${TMP_DIR}/output.json" | jq -r ".serverUrl")
+VERSION=$(cat "${TMP_DIR}/output.json" | jq -r ".result.properties.clusterProfile.version")
+CONSOLE=$(cat "${TMP_DIR}/output.json" | jq -r ".result.properties.consoleProfile.url")
 USER=$(cat "${TMP_DIR}/credentials.json" | jq -r ".kubeadminUsername")
 PWD=$(cat "${TMP_DIR}/credentials.json" | jq -r ".kubeadminPassword")
-jq --null-input --arg id "${ID}" --arg url "${URL}" --arg user "${USER}" --arg pwd "${PWD}" '{"id": $id, "serverUrl": $url, "kubeadminUsername": $user, "kubeadminPassword": $pwd}'
+jq --null-input \
+    --arg id "${ID}" \
+    --arg url "${URL}" \
+    --arg user "${USER}" \
+    --arg pwd "${PWD}" \
+    --arg version "${VERSION}" \
+    --arg console "${CONSOLE}" \
+    '{"id": $id, "serverUrl": $url, "kubeadminUsername": $user, "kubeadminPassword": $pwd, "version": $version, "consoleUrl": $console}'

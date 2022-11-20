@@ -2,17 +2,17 @@ locals {
   tmp_dir = "${path.cwd}/.tmp/aro"
   name_prefix = var.name_prefix != null && var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
-  aro_rg = "/subscriptions/${data.azurerm_client_config.default.subscription_id}/resourceGroups/aro-${local.domain}-${data.azurerm_resource_group.resource_group.location}"
+  aro_rg = "/subscriptions/${data.azurerm_client_config.default.subscription_id}/resourceGroups/${local.name_prefix}-aro"
   vnet_id = data.azurerm_virtual_network.vnet.id
-  # id = data.external.aro.result.id
+  id = data.external.aro.result.id
   cluster_config = "${path.cwd}/.kube/config" 
   cluster_type = "openshift"
   cluster_type_code = "ocp4"
   tls_secret = ""
   visibility = var.disable_public_endpoint ? "Private" : "Public"
   domain = "${random_string.cluster_domain_prefix.result}${random_string.cluster_domain.result}"
-  # ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
-  # console_url = lookup(data.external.aro.result, "consoleUrl", "")
+  ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
+  console_url = lookup(data.external.aro.result, "consoleUrl", "")
   aro_data = jsonencode({
     tmp_dir             = data.external.tmp_dir.result.path
     bin_dir             = module.setup_clis.bin_dir
@@ -212,6 +212,12 @@ resource "azurerm_role_assignment" "aro_resource_provider_service_principal_netw
 
 # Create cluster
 resource "azapi_resource" "aro_cluster" {
+  depends_on = [
+    azurerm_role_assignment.sp_user_administrator,
+    azurerm_role_assignment.sp_contributor,
+    azurerm_role_assignment.aro_resource_provider_service_principal_network_contributor,
+    azurerm_role_assignment.aro_cluster_service_principal_network_contributor
+  ]
   name = local.cluster_name
   location = data.azurerm_resource_group.resource_group.location
   parent_id = data.azurerm_resource_group.resource_group.id
@@ -259,7 +265,7 @@ resource "azapi_resource" "aro_cluster" {
 
   lifecycle {
     ignore_changes = [
-      tags
+      tags, body
     ]
   }
 
@@ -267,4 +273,40 @@ resource "azapi_resource" "aro_cluster" {
     create = "60m"
     delete = "30m"
   }
+}
+
+data "external" "aro" {
+  depends_on = [azapi_resource.aro_cluster]
+
+  program = ["bash", "${path.module}/scripts/get-cluster.sh"]
+
+  query = {
+    tmp_dir             = local.tmp_dir
+    bin_dir             = module.setup_clis.bin_dir
+    cluster_name        = local.cluster_name
+    resource_group_name = data.azurerm_resource_group.resource_group.name
+    subscription_id     = var.subscription_id
+    tenant_id           = var.tenant_id
+    client_id           = var.client_id
+    client_secret       = nonsensitive(var.client_secret)
+    access_token        = ""
+  }
+}
+
+# Wait time added to allow for cluster operators to finish deloying
+resource "time_sleep" "wait_for_cluster" {
+  depends_on = [
+    data.external.aro
+  ]
+
+  create_duration = "2m"
+}
+
+module "oc_login" {
+  source = "github.com/cloud-native-toolkit/terraform-ocp-login.git?ref=v1.6.0"
+
+  server_url      = data.external.aro.result.serverUrl
+  login_user      = data.external.aro.result.kubeadminUsername
+  login_password  = data.external.aro.result.kubeadminPassword
+  login_token     = ""
 }

@@ -15,10 +15,21 @@ module "cluster" {
   worker_subnet_id      = module.worker-subnet.id
 
   encrypt               = true
-  #enable_purge          = true
 }
 
-# output "config_file_path" {
-#   value = module.cluster.config_file_path
-# }
+output "id" {
+  value = module.cluster.console_url
+}
 
+output "username" {
+  value = module.cluster.username
+}
+
+output "password" {
+  value = module.cluster.password
+  sensitive = true
+}
+
+output "cluster_config" {
+  value = module.cluster.config_file_path
+}
