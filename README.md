@@ -165,11 +165,6 @@ module "aro" {
   source               = "github.com/cloud-native-toolkit/terraform-azure-aro"
 
   name_prefix           = "mytest"
-  
-  subscription_id       = var.azure_subscription_id
-  tenant_id             = var.azure_tenant_id
-  client_id             = var.service_principal_id
-  client_secret         = var.service_principal_secret
 
   resource_group_name   = module.resource_group.name
   vnet_name             = module.vnet.name
@@ -192,10 +187,7 @@ This module has the following input variables:
 | worker_subnet_id | | Mandatory | The id of the Azure subnet to attach the worker/compute nodes to |
 | master_subnet_id | | Mandatory | The id of the Azure subnet to attach the master/controller nodes to |
 | name_prefix | Mandatory | | Name to prefix the created resources |
-| subscription_id | Mandatory | | Azure subscription id where the cluster will be installed |
-| tenant_id | Mandatory | | Azure tenant id where the cluster will be installed |
-| client_id | Mandatory | | The id of the service principal to be used for the cluster creation and ongoing management |
-| client_secret | Mandatory | | The secret of the service principal to be used for the cluster creation and ongoing management |
+| client_secret | Optional | | The secret of the service principal to be used for the cluster creation and ongoing management. Provide if using a service principal for azurerm login. |
 | name | "" | Optional | The name to give to the cluster. If left blank, the name will be generated from the name_prefix |
 | name_prefix | "" | Optional | The prefix for the cluster name. If left blank, the network resource group name will be used to derive the cluster name | 
 | master_flavor | Standard_D8s_v3 | Optional | The VM size for the master/controller nodes |
@@ -206,6 +198,11 @@ This module has the following input variables:
 | pull_secret | "" | Optional | A Red Hat pull secret used to access a Red Hat account. If left blank and no pull secret file is provided, cluster will still deploy, but additional content will not be available |
 | pull_secret_file | "" | Optional | Path to a file containing a Red Hat pull secret used to access a Red Hat account. If left blank and no pull secret is provided, cluster will still deploy, but additional content will not be available |
 | label | cluster | Optional | Suffix to be added to the name_prefix to derive the cluster name if no name is provided |
+| encrypt | false | Optional | Flag to encrypt the master and worker nodes with server side encryption |
+| pod_cidr | 10.128.0.0/14 | Optional | CIDR for the internal pod subnet |
+| service_cidr | 172.30.0.0/16 | Optional | CIDR for the internal services subnet |
+| fips | false | Optional | Flag to use FIPS validated modules |
+| tags | {} | Optional | List of tags to be included as name value key pairs |
 
 ### Outputs
 
@@ -221,4 +218,5 @@ The module outputs the following values:
 | username | The login username for the cluster |
 | password | The login password for the cluster |
 | serverURL | The API URL for the cluster |
+| console_url | The URL of the web console for the cluster |
 | platform | Object containing details of the cluster (refer to output.tf for details) |
