@@ -13,7 +13,7 @@ module "cluster" {
   encrypt               = true
 }
 
-output "id" {
+output "server_url" {
   value = module.cluster.console_url
 }
 
