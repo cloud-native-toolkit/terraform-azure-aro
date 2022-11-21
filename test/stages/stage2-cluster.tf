@@ -26,6 +26,6 @@ output "password" {
   sensitive = true
 }
 
-output "cluster_config" {
+output "config_file_path" {
   value = module.cluster.config_file_path
 }
