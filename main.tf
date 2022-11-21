@@ -1,5 +1,5 @@
 locals {
-  tmp_dir = "${path.cwd}/.tmp/aro"
+  tmp_dir = "${path.cwd}/aro"
   name_prefix = var.name_prefix != null && var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
   aro_rg = "/subscriptions/${data.azurerm_client_config.default.subscription_id}/resourceGroups/${local.name_prefix}-aro"
