@@ -180,14 +180,14 @@ module "aro" {
 ### Inputs
 
 This module has the following input variables:
-| Variable | Mandatory / Optional | Default Value | Description |
+| Variable | Default Value | Mandatory / Optional | Description |
 | -------------------------------- | --------------| ------------------ | ----------------------------------------------------------------------------- |
-| resource_group_name | Mandatory |  | The resource group of the network (VNet and subnet) components. A new resource group will be created for the cluster. The location of the cluster will be the same as this resource group.  |
+| resource_group_name | | Mandatory  | The resource group of the network (VNet and subnet) components. A new resource group will be created for the cluster. The location of the cluster will be the same as this resource group.  |
 | vnet_name | | Mandatory | The Azure VNet on which to create the cluster |
 | worker_subnet_id | | Mandatory | The id of the Azure subnet to attach the worker/compute nodes to |
 | master_subnet_id | | Mandatory | The id of the Azure subnet to attach the master/controller nodes to |
-| name_prefix | Mandatory | | Name to prefix the created resources |
-| client_secret | Optional | | The secret of the service principal to be used for the cluster creation and ongoing management. Provide if using a service principal for azurerm login. |
+| name_prefix | | Mandatory | Name to prefix the created resources |
+| client_secret | "" | Optional  | The secret of the service principal to be used for the cluster creation and ongoing management. Provide if using a service principal for azurerm login. |
 | name | "" | Optional | The name to give to the cluster. If left blank, the name will be generated from the name_prefix |
 | name_prefix | "" | Optional | The prefix for the cluster name. If left blank, the network resource group name will be used to derive the cluster name | 
 | master_flavor | Standard_D8s_v3 | Optional | The VM size for the master/controller nodes |
