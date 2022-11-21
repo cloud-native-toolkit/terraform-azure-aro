@@ -6,11 +6,11 @@ Module creates an Azure RedHat OpenShift (ARO) cluster. It includes the followin
 - terraform-util-clis (to setup CLI utils for build)
 - random_domain
 - terraform-azure-resource-group (to create a resource group for the ARO cluster)
-- null_resource_aro (creates and destroys the cluster)
+- 
 
 ### Software dependencies
 
-- terraform CLI >= 1.2.6
+- terraform CLI >= 1.2.6 
 - Azure CLI (az) >= 2.42.0 (must be in the path environment variable)
 
 ### Terraform providers
@@ -28,7 +28,15 @@ This module makes use of the output from other modules:
 
 ## Prerequisites
 
-### Option 1 - Use a service principal 
+### Common
+
+Ensure that the subscription has the `Microsoft.RedHatOpenShift` provider namespace registerd. 
+To do so:
+  ```
+  $ az provider register --namespace "Microsoft.RedHatOpenShift"
+  ```
+
+### Azure Login Option 1 - Use a service principal 
 
 Use this option with automated execution. The service principal needs the following roles assigned
 - In the active directory, application and user administrator permissions
@@ -71,9 +79,28 @@ Use this option with automated execution. The service principal needs the follow
 
 1. Export the service principal details are environment variables.
 
-### Option 2 - Login with your own user
+  ```
+  $ export TF_VAR_subscription_id=<subscription_id>
+  $ export TF_VAR_tenant_id=<tenant_id>
+  $ export TF_VAR_client_id=<service_principal_app_id>
+  $ export TF_VAR_client_secret=<service_principal_secret>
+  ```
 
-Use this option if running from your terminal. To use your login details. 
+1. Set the variables in the provider block to use those credentials
+  ```hcl-terraform
+  provider "azurerm" {
+    features {}
+    subscription_id = var.subscription_id
+    client_id       = var.client_id
+    client_secret   = var.client_secret
+    tenant_id       = var.tenant_id
+  }
+  ```
+
+### Azure Login Option 2 - Use your Azure user id
+
+Use this option if running from your terminal. Uses your Azure user. 
+***Note that your Azure user must have contributor and user access administrator rights to the subscription***
 1. Login to the az cli from within the container before proceeding with terraform actions.  
   ```
   $ az login

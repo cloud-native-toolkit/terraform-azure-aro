@@ -3,25 +3,11 @@ variable "resource_group_name" {
   description = "The name of the resource group where the cluster will be provisioned"
 }
 
-variable "subscription_id" {
-  type        = string
-  description = "The id of the subscription where the cluster will be provisioned"
-}
-
-variable "tenant_id" {
-  type        = string
-  description = "The id of the tenant within the subscription to provision the cluster"
-}
-
-variable "client_id" {
-  type        = string
-  description = "The client_id or username to access the tenant"
-}
-
 variable "client_secret" {
   type        = string
-  description = "The secret used to access the tenant"
+  description = "The secret used to access the subscription"
   sensitive   = true
+  default     = ""
 }
 
 variable "master_subnet_id" {

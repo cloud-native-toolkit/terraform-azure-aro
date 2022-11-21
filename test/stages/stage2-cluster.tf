@@ -3,9 +3,6 @@ module "cluster" {
 
   name_prefix           = local.name_prefix
   
-  subscription_id       = var.subscription_id
-  tenant_id             = var.tenant_id
-  client_id             = var.client_id
   client_secret         = var.client_secret
 
   resource_group_name   = module.resource_group.name

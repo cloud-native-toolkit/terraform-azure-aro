@@ -82,9 +82,9 @@ resource "null_resource" "az_login" {
 
     environment = {
       CLIENT_ID       = data.azurerm_client_config.default.client_id
-      CLIENT_SECRET   = var.client_secret
       TENANT_ID       = data.azurerm_client_config.default.tenant_id
-      SUBSCRIPTION_ID = var.subscription_id
+      SUBSCRIPTION_ID = data.azurerm_client_config.default.subscription_id
+      CLIENT_SECRET   = var.client_secret
       OUTPUT          = "${data.external.tmp_dir.result.path}/account.json"
      }
   }
@@ -100,30 +100,6 @@ data "external" "aro_rp" {
     rp_data_file  = local.rp_data_file
   }
 }
-
-# Register providers
-
-#
-# Below resource already exists in the test account
-# resource "azurerm_resource_provider_registration" "openshift" {
-#   name = "Microsoft.RedHatOpenShift"
-# }
-
-#
-# Below are automatically registered with terraform provider
-# To use these, add skip_provider_registration = true to provider block
-#
-# resource "azurerm_resource_provider_registration" "compute" {
-#   name = "Microsoft.Compute"
-# }
-
-# resource "azurerm_resource_provider_registration" "storage" {
-#   name = "Microsoft.Storage"
-# }
-
-# resource "azurerm_resource_provider_registration" "authorization" {
-#   name = "Microsoft.Authorization"
-# }
 
 # Create service principal
 resource "null_resource" "service_principal" {
@@ -273,10 +249,10 @@ data "external" "aro" {
     bin_dir             = module.setup_clis.bin_dir
     cluster_name        = local.cluster_name
     resource_group_name = data.azurerm_resource_group.resource_group.name
-    subscription_id     = var.subscription_id
-    tenant_id           = var.tenant_id
-    client_id           = var.client_id
-    client_secret       = nonsensitive(var.client_secret)
+    subscription_id     = data.azurerm_client_config.default.subscription_id
+    tenant_id           = data.azurerm_client_config.default.tenant_id
+    client_id           = data.external.sp_data.result.client_id
+    client_secret       = data.external.sp_data.result.client_secret
     access_token        = ""
   }
 }

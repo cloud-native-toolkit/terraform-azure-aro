@@ -22,11 +22,23 @@ variable "vnet_cidr" {
   default = "10.0.0.0/18"
 }
 
-variable "subscription_id" {}
+variable "subscription_id" {
+  type = string
+  default = null
+}
 
-variable "client_id" {}
+variable "client_id" {
+  type = string
+  default = null
+}
 
-variable "client_secret" {}
+variable "client_secret" {
+  type = string
+  default = null
+}
 
-variable "tenant_id" {}
+variable "tenant_id" {
+  type = string
+  default = null
+}
 
