@@ -53,6 +53,8 @@ versions:
       description: "Path to the config file for the cluster"
     - name: serverURL
       description: "The URL used to connect to the API of the cluster"
+    - name: console_url
+      description: "The URL for the web console of the cluster"
     - name: username
       description: "Username for the cluster"
     - name: password
