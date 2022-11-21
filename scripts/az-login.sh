@@ -12,6 +12,7 @@ if [[ -z $CLIENT_SECRET ]]; then
     CLIENT_SECRET=$(echo $TF_VAR_client_secret)
   else
     CLIENT_SECRET=""    # This will cause the next section to fail if not already logged in
+  fi
 fi
 
 
