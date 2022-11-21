@@ -4,8 +4,7 @@ locals {
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
   aro_rg = "/subscriptions/${data.azurerm_client_config.default.subscription_id}/resourceGroups/${local.name_prefix}-aro"
   vnet_id = data.azurerm_virtual_network.vnet.id
-  id = data.external.aro.result.id
-  cluster_config = "${path.cwd}/.kube/config" 
+  id = data.external.aro.result.id 
   cluster_type = "openshift"
   cluster_type_code = "ocp4"
   tls_secret = ""
@@ -13,17 +12,6 @@ locals {
   domain = "${random_string.cluster_domain_prefix.result}${random_string.cluster_domain.result}"
   ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
   console_url = lookup(data.external.aro.result, "consoleUrl", "")
-  aro_data = jsonencode({
-    tmp_dir             = data.external.tmp_dir.result.path
-    bin_dir             = module.setup_clis.bin_dir
-    cluster_name        = local.cluster_name
-    resource_group_name = var.resource_group_name
-    subscription_id     = var.subscription_id
-    tenant_id           = var.tenant_id
-    client_id           = var.client_id
-    client_secret       = nonsensitive(var.client_secret)
-    access_token        = ""
-  })
   pull_secret = var.pull_secret_file != "" ? file(var.pull_secret_file) : var.pull_secret
   sp_name = "${local.name_prefix}-aro-${local.domain}-sp"
   sp_data_file = "${data.external.tmp_dir.result.path}/app-service-principal.json"

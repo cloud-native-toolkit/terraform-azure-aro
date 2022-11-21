@@ -24,11 +24,6 @@ variable "client_secret" {
   sensitive   = true
 }
 
-variable "region" {
-  type        = string
-  description = "The location where the cluster should be provisioned"
-}
-
 variable "master_subnet_id" {
   type        = string
   description = "The id of the subnet where the master nodes will be placed"

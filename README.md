@@ -30,7 +30,7 @@ This module makes use of the output from other modules:
 
 ### Option 1 - Use a service principal 
 
-The service principal needs the following roles assigned
+Use this option with automated execution. The service principal needs the following roles assigned
 - In the active directory, application and user administrator permissions
 
   - User Administrator
@@ -69,9 +69,27 @@ The service principal needs the following roles assigned
     1. Choose the service principal
     1. Review and assign
 
+1. Export the service principal details are environment variables.
+
 ### Option 2 - Login with your own user
 
-Functionality to support using your own user will be provided in a future release.
+Use this option if running from your terminal. To use your login details. 
+1. Login to the az cli from within the container before proceeding with terraform actions.  
+  ```
+  $ az login
+  ```
+1. If you have more than one subscription, set the relevant subscription to be used.
+  ```
+  $ az account set --subscription="<SUBSCRIPTION_ID>"
+  ```
+  where <SUBSCRIPTION_ID> is the id of the subscription to be utilized.
+
+1. Do not include the login details in the provider.tf file in terraform
+  ```hcl-terraform
+  provider "azurerm" {
+    features {}
+  }
+  ```
 
 ## Example Usage
 
@@ -127,10 +145,11 @@ module "aro" {
   client_secret         = var.service_principal_secret
 
   resource_group_name   = module.resource_group.name
-  region                = module.resource_group.region
   vnet_name             = module.vnet.name
   master_subnet_id      = module.master-subnet.id
-  worker_subent_id      = module.worker-subnet.id
+  worker_subnet_id      = module.worker-subnet.id
+
+  encrypt               = true
 }
 ```
 
@@ -138,13 +157,10 @@ module "aro" {
 
 ### Inputs
 
-### Inputs
-
 This module has the following input variables:
 | Variable | Mandatory / Optional | Default Value | Description |
 | -------------------------------- | --------------| ------------------ | ----------------------------------------------------------------------------- |
-| resource_group_name | Mandatory |  | The resource group of the network (VNet and subnet) components. A new resource group will be created for the cluster.  |
-| region | | Manadatory | The Azure region/location where the cluster is to be deployed |
+| resource_group_name | Mandatory |  | The resource group of the network (VNet and subnet) components. A new resource group will be created for the cluster. The location of the cluster will be the same as this resource group.  |
 | vnet_name | | Mandatory | The Azure VNet on which to create the cluster |
 | worker_subnet_id | | Mandatory | The id of the Azure subnet to attach the worker/compute nodes to |
 | master_subnet_id | | Mandatory | The id of the Azure subnet to attach the master/controller nodes to |

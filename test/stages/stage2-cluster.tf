@@ -9,7 +9,6 @@ module "cluster" {
   client_secret         = var.client_secret
 
   resource_group_name   = module.resource_group.name
-  region                = module.resource_group.region
   vnet_name             = module.vnet.name
   master_subnet_id      = module.master-subnet.id
   worker_subnet_id      = module.worker-subnet.id
