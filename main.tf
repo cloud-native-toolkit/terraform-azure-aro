@@ -1,5 +1,5 @@
 locals {
-  tmp_dir = "${path.cwd}/aro"
+  tmp_dir = "${path.cwd}/.tmp/aro"
   name_prefix = var.name_prefix != null && var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
   key_vault_name = "${local.name_prefix}-vault"
