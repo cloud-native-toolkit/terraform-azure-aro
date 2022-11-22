@@ -3,10 +3,18 @@
 ## Module Overview
 
 Module creates an Azure RedHat OpenShift (ARO) cluster. It includes the following resources:
-- terraform-util-clis (to setup CLI utils for build)
-- random_domain
-- terraform-azure-resource-group (to create a resource group for the ARO cluster)
-- 
+- terraform-util-clis - to setup CLI utils for build
+- terraform-ocp-login - to login to the cluster once it is built
+- random_domain - generates a random domain name
+- null_resource az_login - to login to the az cli with the supplied credentials, or use existing login
+- external aro_rp - to obtain OpenShift resource provider details
+- null_resource service_principal - to create and destroy a service principal for cluster to use to call Azure API
+- azurerm_key_vault - if a key_vault_id is not provided, this will create a new key vault for the service principal details
+- azurerm_key_vault_secret - to store the service principal details
+- azurerm_role_assignment - assigns required roles to service principal and resource provider
+- azapi_resource - CRUD for the ARO cluster
+- external aro - obtains details of the created cluster
+- time_sleep - a delay to allow the cluster to settle
 
 ### Software dependencies
 
@@ -198,6 +206,7 @@ This module has the following input variables:
 | pull_secret | "" | Optional | A Red Hat pull secret used to access a Red Hat account. If left blank and no pull secret file is provided, cluster will still deploy, but additional content will not be available |
 | pull_secret_file | "" | Optional | Path to a file containing a Red Hat pull secret used to access a Red Hat account. If left blank and no pull secret is provided, cluster will still deploy, but additional content will not be available |
 | label | cluster | Optional | Suffix to be added to the name_prefix to derive the cluster name if no name is provided |
+| key_vault_id | "" | Optional | Existing key vault id to use (will create a new one if not provided) |
 | encrypt | false | Optional | Flag to encrypt the master and worker nodes with server side encryption |
 | pod_cidr | 10.128.0.0/14 | Optional | CIDR for the internal pod subnet |
 | service_cidr | 172.30.0.0/16 | Optional | CIDR for the internal services subnet |

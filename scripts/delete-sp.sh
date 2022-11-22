@@ -1,23 +1,14 @@
 #!/usr/bin/env bash
 
-# Parse output from sp create 
-if [[ ! -f ${SP_FILE} ]]; then
-  # allow normal exit to cater for calling script multiple times
-  echo "Service principal file does not exist"
-  exit 0;
-elif [[ ! -f ${BIN_DIR}/jq ]]; then
-  echo "ERROR: ${BIN_DIR}/jq not found"
-  exit 1;
-else
-  ID=$("${BIN_DIR}"/jq -r '.id' "${SP_FILE}")
+# Find SP id if it exists
+SP_ID=$(az ad sp list --query "[].{name:displayName,id:id}" --all | ${BIN_DIR}/jq -r ".[] | select(.name==\"${SP_NAME}\") | .id")
+
+# Delete SP if it exists (based upon above query)
+if [[ -n $SP_ID ]]; then
+  az ad sp delete --id ${SP_ID}
 fi
 
-# Check if SP exists and delete it if does
-if [[ $(az ad sp show --id "${ID}" | grep "exist") == "" ]]; then
-  az ad sp delete --id ${ID}
-fi
-
-# Remove SP_FILE (double check file exists first)
+# Remove SP_FILE if it exists
 if [[ -f ${SP_FILE} ]]; then
   rm ${SP_FILE}
 fi

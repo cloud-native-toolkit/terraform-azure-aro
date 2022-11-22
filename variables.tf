@@ -97,6 +97,12 @@ variable "label" {
   default     = "cluster"
 }
 
+variable "key_vault_id" {
+  type = string
+  description = "THe Azure id of an existing key vault to use to store ARO Service Principal credentials (default = \"\")"
+  default = ""
+}
+
 variable "encrypt" {
   type        = bool
   description = "Flag to encrypt the VM disks (default = false)"

@@ -2,6 +2,8 @@ locals {
   tmp_dir = "${path.cwd}/aro"
   name_prefix = var.name_prefix != null && var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
+  key_vault_name = "${local.name_prefix}-vault"
+  key_vault_id = var.key_vault_id == "" ? azurerm_key_vault.key_vault[0].id : var.key_vault_id
   aro_rg = "/subscriptions/${data.azurerm_client_config.default.subscription_id}/resourceGroups/${local.name_prefix}-aro"
   vnet_id = data.azurerm_virtual_network.vnet.id
   id = data.external.aro.result.id 
@@ -16,7 +18,6 @@ locals {
   sp_name = "${local.name_prefix}-aro-${local.domain}-sp"
   sp_data_file = "${data.external.tmp_dir.result.path}/app-service-principal.json"
   rp_data_file = "${data.external.tmp_dir.result.path}/aro-resource-provider.json"
-
 }
 
 module setup_clis {
@@ -128,12 +129,46 @@ resource "null_resource" "service_principal" {
     command = "${path.module}/scripts/delete-sp.sh" 
 
     environment = {
+      SP_NAME   = self.triggers.sp_name
       BIN_DIR   = self.triggers.bin_dir
       SP_FILE   = self.triggers.sp_data_file
     } 
   }
 }
 
+# Create key vault if not already present to store service principal details
+
+resource "azurerm_key_vault" "key_vault" {
+  count = var.key_vault_id == "" ? 1 : 0
+
+  name                        = local.key_vault_name
+  location                    = data.azurerm_resource_group.resource_group.location
+  resource_group_name         = data.azurerm_resource_group.resource_group.name
+  tenant_id                   = data.azurerm_client_config.default.tenant_id
+  sku_name                    = "premium"
+  soft_delete_retention_days  = 7
+
+  access_policy {
+    object_id = data.azurerm_client_config.default.object_id
+    tenant_id = data.azurerm_client_config.default.tenant_id
+
+    key_permissions = [ 
+      "Create",
+      "Get"
+     ]
+
+    secret_permissions = [ 
+      "Set",
+      "Get",
+      "Delete",
+      "Purge",
+      "Recover"
+     ]
+
+  }
+}
+
+# Below reads the output of the service principal creation
 data "external" "sp_data" {
   depends_on = [
     null_resource.service_principal
@@ -147,23 +182,61 @@ data "external" "sp_data" {
   }
 }
 
+# Following stores the output of the above into secrets in a key vault
+
+resource "azurerm_key_vault_secret" "aro-sp-id" {
+  name          = "${local.sp_name}-id"
+  value         = data.external.sp_data.result.id
+  key_vault_id  = local.key_vault_id
+}
+
+data "azurerm_key_vault_secret" "aro-sp-id" {
+  depends_on = [azurerm_key_vault_secret.aro-sp-id]
+  name          = "${local.sp_name}-id"
+  key_vault_id  = local.key_vault_id
+}
+
+resource "azurerm_key_vault_secret" "aro-sp-client-id" {
+  name          = "${local.sp_name}-client-id"
+  value         = data.external.sp_data.result.client_id
+  key_vault_id  = local.key_vault_id  
+}
+
+data "azurerm_key_vault_secret" "aro-sp-client-id" {
+  depends_on = [azurerm_key_vault_secret.aro-sp-client-id]
+  name          = "${local.sp_name}-client-id"
+  key_vault_id  = local.key_vault_id
+}
+
+resource "azurerm_key_vault_secret" "aro-sp-client-secret" {
+  name          = "${local.sp_name}-client-secret"
+  value         = data.external.sp_data.result.client_secret
+  key_vault_id  = local.key_vault_id  
+}
+
+data "azurerm_key_vault_secret" "aro-sp-client-secret" {
+  depends_on = [azurerm_key_vault_secret.aro-sp-client-secret]
+  name          = "${local.sp_name}-client-secret"
+  key_vault_id  = local.key_vault_id
+}
+
 # Create role assignments
 resource "azurerm_role_assignment" "sp_user_administrator" {
   scope                 = data.azurerm_resource_group.resource_group.id
   role_definition_name  = "User Access Administrator"
-  principal_id          = data.external.sp_data.result.id
+  principal_id          = data.azurerm_key_vault_secret.aro-sp-id.value
 }
 
 resource "azurerm_role_assignment" "sp_contributor" {
   scope                 = data.azurerm_resource_group.resource_group.id
   role_definition_name  = "Contributor"
-  principal_id          = data.external.sp_data.result.id
+  principal_id          = data.azurerm_key_vault_secret.aro-sp-id.value
 }
 
 resource "azurerm_role_assignment" "aro_cluster_service_principal_network_contributor" {
   scope                 = data.azurerm_virtual_network.vnet.id
   role_definition_name  = "Contributor"
-  principal_id          = data.external.sp_data.result.id
+  principal_id          = data.azurerm_key_vault_secret.aro-sp-id.value
   skip_service_principal_aad_check = true
 }
 
@@ -191,8 +264,8 @@ resource "azapi_resource" "aro_cluster" {
   body = jsonencode({
     properties = {
       servicePrincipalProfile = {
-        clientId              = data.external.sp_data.result.client_id
-        clientSecret          = data.external.sp_data.result.client_secret
+        clientId              = data.azurerm_key_vault_secret.aro-sp-client-id.value
+        clientSecret          = data.azurerm_key_vault_secret.aro-sp-client-secret.value
       }
       clusterProfile = {
         domain                = local.domain
@@ -251,8 +324,8 @@ data "external" "aro" {
     resource_group_name = data.azurerm_resource_group.resource_group.name
     subscription_id     = data.azurerm_client_config.default.subscription_id
     tenant_id           = data.azurerm_client_config.default.tenant_id
-    client_id           = data.external.sp_data.result.client_id
-    client_secret       = data.external.sp_data.result.client_secret
+    client_id           = data.azurerm_key_vault_secret.aro-sp-client-id.value
+    client_secret       = data.azurerm_key_vault_secret.aro-sp-client-secret.value
     access_token        = ""
   }
 }
