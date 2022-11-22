@@ -2,29 +2,22 @@ locals {
   tmp_dir = "${path.cwd}/.tmp/aro"
   name_prefix = var.name_prefix != null && var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   cluster_name = var.name != null && var.name != "" ? var.name : "${local.name_prefix}-${var.label}"
+  key_vault_name = "${local.name_prefix}-vault"
+  key_vault_id = var.key_vault_id == "" ? azurerm_key_vault.key_vault[0].id : var.key_vault_id
+  aro_rg = "/subscriptions/${data.azurerm_client_config.default.subscription_id}/resourceGroups/${local.name_prefix}-aro"
   vnet_id = data.azurerm_virtual_network.vnet.id
-  id = data.external.aro.result.id
-  cluster_config = "${path.cwd}/.kube/config" 
+  id = data.external.aro.result.id 
   cluster_type = "openshift"
   cluster_type_code = "ocp4"
   tls_secret = ""
-  total_workers = var._count
   visibility = var.disable_public_endpoint ? "Private" : "Public"
   domain = "${random_string.cluster_domain_prefix.result}${random_string.cluster_domain.result}"
   ingress_hostname = lookup(data.external.aro.result, "publicSubdomain", "")
   console_url = lookup(data.external.aro.result, "consoleUrl", "")
-  aro_data = jsonencode({
-    tmp_dir             = local.tmp_dir
-    bin_dir             = module.setup_clis.bin_dir
-    cluster_name        = local.cluster_name
-    resource_group_name = var.resource_group_name
-    subscription_id     = var.subscription_id
-    tenant_id           = var.tenant_id
-    client_id           = var.client_id
-    client_secret       = nonsensitive(var.client_secret)
-    access_token        = ""
-  })
   pull_secret = var.pull_secret_file != "" ? file(var.pull_secret_file) : var.pull_secret
+  sp_name = "${local.name_prefix}-aro-${local.domain}-sp"
+  sp_data_file = "${data.external.tmp_dir.result.path}/app-service-principal.json"
+  rp_data_file = "${data.external.tmp_dir.result.path}/aro-resource-provider.json"
 }
 
 module setup_clis {
@@ -74,15 +67,79 @@ data azurerm_virtual_network vnet {
   resource_group_name = data.azurerm_resource_group.resource_group.name
 }
 
-# Following sets up disk ecnryption if required
+# Create tmp dir if not already in place
+data "external" "tmp_dir" {
+  program = ["bash","${path.module}/scripts/create-tmp-dir.sh"]
 
-locals {
-    key_vault_name = var.key_vault_name == "" ? "${local.name_prefix}-vault" : var.key_vault_name
-    create_vault   = var.encrypt && var.key_vault_name == "" ? true : false
+  query = {
+    tmp_dir = local.tmp_dir
+  }
 }
 
+# Login to az cli if not already
+resource "null_resource" "az_login" {
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/az-login.sh"
+
+    environment = {
+      CLIENT_ID       = data.azurerm_client_config.default.client_id
+      TENANT_ID       = data.azurerm_client_config.default.tenant_id
+      SUBSCRIPTION_ID = data.azurerm_client_config.default.subscription_id
+      CLIENT_SECRET   = var.client_secret
+      OUTPUT          = "${data.external.tmp_dir.result.path}/account.json"
+     }
+  }
+}
+
+data "external" "aro_rp" {
+  depends_on = [
+    null_resource.az_login
+  ]
+  program = ["bash","${path.module}/scripts/get-ocp-rp-id.sh"]
+
+  query = {
+    rp_data_file  = local.rp_data_file
+  }
+}
+
+# Create service principal
+resource "null_resource" "service_principal" {
+  depends_on = [
+    null_resource.az_login
+  ]
+  triggers = {
+    sp_name       = local.sp_name
+    sp_data_file  = local.sp_data_file
+    bin_dir       = module.setup_clis.bin_dir
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/create-sp.sh"
+
+    environment = {
+      SP_NAME   = self.triggers.sp_name 
+      BIN_DIR   = self.triggers.bin_dir
+      OUT_FILE  = self.triggers.sp_data_file
+     }
+  }
+
+  provisioner "local-exec" {
+    when = destroy
+
+    command = "${path.module}/scripts/delete-sp.sh" 
+
+    environment = {
+      SP_NAME   = self.triggers.sp_name
+      BIN_DIR   = self.triggers.bin_dir
+      SP_FILE   = self.triggers.sp_data_file
+    } 
+  }
+}
+
+# Create key vault if not already present to store service principal details
+
 resource "azurerm_key_vault" "key_vault" {
-  count = local.create_vault ? 1 : 0
+  count = var.key_vault_id == "" ? 1 : 0
 
   name                        = local.key_vault_name
   location                    = data.azurerm_resource_group.resource_group.location
@@ -90,156 +147,173 @@ resource "azurerm_key_vault" "key_vault" {
   tenant_id                   = data.azurerm_client_config.default.tenant_id
   sku_name                    = "premium"
   soft_delete_retention_days  = 7
-  enabled_for_disk_encryption = true
-  purge_protection_enabled    = true
-}
 
-data "azurerm_key_vault" "key_vault" {
-  count = local.create_vault ? 0 : 1
+  access_policy {
+    object_id = data.azurerm_client_config.default.object_id
+    tenant_id = data.azurerm_client_config.default.tenant_id
 
-  name                = var.key_vault_name
-  resource_group_name = data.azurerm_resource_group.resource_group.name
-}
+    key_permissions = [ 
+      "Create",
+      "Get"
+     ]
 
-resource "azurerm_key_vault_access_policy" "user" {
-  count = var.encrypt ? 1 : 0
+    secret_permissions = [ 
+      "Set",
+      "Get",
+      "Delete",
+      "Purge",
+      "Recover"
+     ]
 
-  key_vault_id  = local.create_vault ? azurerm_key_vault.key_vault[0].id : data.azurerm_key_vault.key_vault[0].id
-  tenant_id     = data.azurerm_client_config.default.tenant_id
-  object_id     = data.azurerm_client_config.default.object_id
-
-  key_permissions = [ 
-    "Create",
-    "Delete",
-    "Get",
-    "Purge",
-    "Recover",
-    "Update",
-    "List",
-    "Decrypt",
-    "Sign"
-  ]
-}
-
-resource "azurerm_key_vault_key" "encryption_key" {
-  depends_on = [azurerm_key_vault_access_policy.user]
-  count = var.encrypt ? 1 : 0
-
-  name          = "${local.cluster_name}-key"
-  key_vault_id  = local.create_vault ? azurerm_key_vault.key_vault[0].id : data.azurerm_key_vault.key_vault[0].id
-  key_type      = "RSA"
-  key_size      = "2048"
-
-  key_opts = [
-    "decrypt",
-    "encrypt",
-    "sign",
-    "unwrapKey",
-    "verify",
-    "wrapKey"
-  ]
-}
-
-resource "azurerm_disk_encryption_set" "aro" {
-  count = var.encrypt ? 1 : 0
-
-  name                  = "${local.cluster_name}-des"
-  resource_group_name   = data.azurerm_resource_group.resource_group.name
-  location              = data.azurerm_resource_group.resource_group.location
-  key_vault_key_id      = azurerm_key_vault_key.encryption_key[0].id
-
-  identity {
-    type = "SystemAssigned"
   }
 }
 
-resource "azurerm_key_vault_access_policy" "aro-disk" {
-  count = var.encrypt ? 1 : 0
-
-  key_vault_id  = local.create_vault ? azurerm_key_vault.key_vault[0].id : data.azurerm_key_vault.key_vault[0].id
-  tenant_id     = azurerm_disk_encryption_set.aro[0].identity.0.tenant_id
-  object_id     = azurerm_disk_encryption_set.aro[0].identity.0.principal_id
-
-  key_permissions = [ 
-    "Create",
-    "Delete",
-    "Get",
-    "Purge",
-    "Recover",
-    "Update",
-    "List",
-    "Decrypt",
-    "Sign",
-    "WrapKey",
-    "UnwrapKey"
-  ]
-}
-
-resource "azurerm_role_assignment" "aro-disk" {
-  count = var.encrypt ? 1 : 0
-
-  scope = local.create_vault ? azurerm_key_vault.key_vault[0].id : data.azurerm_key_vault.key_vault[0].id
-  role_definition_name = "Key Vault Crypto Service Encryption User"
-  principal_id = azurerm_disk_encryption_set.aro[0].identity.0.principal_id
-}
-
-# Following deploys the ARO cluster
-resource null_resource aro {
-  count = var.provision ? 1 : 0
+# Below reads the output of the service principal creation
+data "external" "sp_data" {
   depends_on = [
-    data.azurerm_virtual_network.vnet,
-    azurerm_key_vault_access_policy.aro-disk
+    null_resource.service_principal
   ]
 
-  triggers = {
-    bin_dir             = module.setup_clis.bin_dir
-    subscription_id     = var.subscription_id
-    resource_group_name = data.azurerm_resource_group.resource_group.name
-    cluster_name        = local.cluster_name
-    tenant_id           = var.tenant_id
-    client_id           = var.client_id
-    client_secret       = var.client_secret
-    disk_encryption_set = var.encrypt ? azurerm_disk_encryption_set.aro[0].id : null
-    encrypt             = var.encrypt
+  program = ["bash", "${path.module}/scripts/read-sp-details.sh"]
+
+  query = {
+    bin_dir       = module.setup_clis.bin_dir
+    sp_data_file  = local.sp_data_file
+  }
+}
+
+# Following stores the output of the above into secrets in a key vault
+
+resource "azurerm_key_vault_secret" "aro-sp-id" {
+  name          = "${local.sp_name}-id"
+  value         = data.external.sp_data.result.id
+  key_vault_id  = local.key_vault_id
+}
+
+data "azurerm_key_vault_secret" "aro-sp-id" {
+  depends_on = [azurerm_key_vault_secret.aro-sp-id]
+  name          = "${local.sp_name}-id"
+  key_vault_id  = local.key_vault_id
+}
+
+resource "azurerm_key_vault_secret" "aro-sp-client-id" {
+  name          = "${local.sp_name}-client-id"
+  value         = data.external.sp_data.result.client_id
+  key_vault_id  = local.key_vault_id  
+}
+
+data "azurerm_key_vault_secret" "aro-sp-client-id" {
+  depends_on = [azurerm_key_vault_secret.aro-sp-client-id]
+  name          = "${local.sp_name}-client-id"
+  key_vault_id  = local.key_vault_id
+}
+
+resource "azurerm_key_vault_secret" "aro-sp-client-secret" {
+  name          = "${local.sp_name}-client-secret"
+  value         = data.external.sp_data.result.client_secret
+  key_vault_id  = local.key_vault_id  
+}
+
+data "azurerm_key_vault_secret" "aro-sp-client-secret" {
+  depends_on = [azurerm_key_vault_secret.aro-sp-client-secret]
+  name          = "${local.sp_name}-client-secret"
+  key_vault_id  = local.key_vault_id
+}
+
+# Create role assignments
+resource "azurerm_role_assignment" "sp_user_administrator" {
+  scope                 = data.azurerm_resource_group.resource_group.id
+  role_definition_name  = "User Access Administrator"
+  principal_id          = data.azurerm_key_vault_secret.aro-sp-id.value
+}
+
+resource "azurerm_role_assignment" "sp_contributor" {
+  scope                 = data.azurerm_resource_group.resource_group.id
+  role_definition_name  = "Contributor"
+  principal_id          = data.azurerm_key_vault_secret.aro-sp-id.value
+}
+
+resource "azurerm_role_assignment" "aro_cluster_service_principal_network_contributor" {
+  scope                 = data.azurerm_virtual_network.vnet.id
+  role_definition_name  = "Contributor"
+  principal_id          = data.azurerm_key_vault_secret.aro-sp-id.value
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "aro_resource_provider_service_principal_network_contributor" {
+  scope                 = data.azurerm_virtual_network.vnet.id
+  role_definition_name  = "Contributor"
+  principal_id          = data.external.aro_rp.result.id
+  skip_service_principal_aad_check = true
+}
+
+# Create cluster
+resource "azapi_resource" "aro_cluster" {
+  depends_on = [
+    azurerm_role_assignment.sp_user_administrator,
+    azurerm_role_assignment.sp_contributor,
+    azurerm_role_assignment.aro_resource_provider_service_principal_network_contributor,
+    azurerm_role_assignment.aro_cluster_service_principal_network_contributor
+  ]
+  name = local.cluster_name
+  location = data.azurerm_resource_group.resource_group.location
+  parent_id = data.azurerm_resource_group.resource_group.id
+  type = "Microsoft.RedHatOpenShift/openShiftClusters@2022-04-01"
+  tags = var.tags
+
+  body = jsonencode({
+    properties = {
+      servicePrincipalProfile = {
+        clientId              = data.azurerm_key_vault_secret.aro-sp-client-id.value
+        clientSecret          = data.azurerm_key_vault_secret.aro-sp-client-secret.value
+      }
+      clusterProfile = {
+        domain                = local.domain
+        fipsValidatedModules  = var.fips ? "Enabled" : "Disabled"
+        resourceGroupId       = local.aro_rg
+        pullSecret            = local.pull_secret
+      }
+      networkProfile = {
+        podCidr               = var.pod_cidr
+        serviceCidr           = var.service_cidr
+      }
+      masterProfile = {
+        vmSize                = var.master_flavor
+        subnetId              = var.master_subnet_id
+        encryptionAtHost      = var.encrypt ? "Enabled" : "Disabled"
+      }
+      workerProfiles = [{
+        name                  = "worker"
+        vmSize                = var.worker_flavor
+        subnetId              = var.worker_subnet_id
+        count                 = var.worker_count
+        diskSizeGB            = var.worker_disk_size
+        encryptionAtHost      = var.encrypt ? "Enabled" : "Disabled"
+      }]
+      apiserverProfile = {
+        visibility            = var.disable_public_endpoint ? "Private" : "Public"
+      }
+      ingressProfiles = [{
+        name                  = "default"
+        visibility            = var.disable_public_endpoint ? "Private" : "Public"
+      }]
+    }
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags, body
+    ]
   }
 
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/create-cluster.sh '${self.triggers.subscription_id}' '${self.triggers.resource_group_name}' '${self.triggers.cluster_name}' '${var.region}' '${local.vnet_id}' '${var.master_subnet_id}' '${var.worker_subnet_id}' '${local.domain}'"
-
-    environment = {
-      BIN_DIR = self.triggers.bin_dir
-      TMP_DIR = local.tmp_dir
-      TENANT_ID = self.triggers.tenant_id
-      CLIENT_ID = self.triggers.client_id
-      CLIENT_SECRET = nonsensitive(self.triggers.client_secret)
-      VM_SIZE = var.flavor
-      MASTER_VM_SIZE = var.master_flavor
-      OS_TYPE = var.os_type
-      WORKER_COUNT = var._count
-      REGION = var.region
-      VISIBILITY = local.visibility
-      DISK_SIZE = var.disk_size
-      PULL_SECRET = local.pull_secret
-      ENCRYPT = self.triggers.encrypt
-      DES = self.triggers.disk_encryption_set
-    }
-  }
-
-  provisioner "local-exec" {
-    when = destroy
-    command = "${path.module}/scripts/destroy-cluster.sh '${self.triggers.subscription_id}' '${self.triggers.resource_group_name}' '${self.triggers.cluster_name}'"
-
-    environment = {
-      BIN_DIR = self.triggers.bin_dir
-      TENANT_ID = self.triggers.tenant_id
-      CLIENT_ID = self.triggers.client_id
-      CLIENT_SECRET = nonsensitive(self.triggers.client_secret)
-    }
+  timeouts {
+    create = "60m"
+    delete = "30m"
   }
 }
 
 data "external" "aro" {
-  depends_on = [null_resource.aro]
+  depends_on = [azapi_resource.aro_cluster]
 
   program = ["bash", "${path.module}/scripts/get-cluster.sh"]
 
@@ -248,10 +322,10 @@ data "external" "aro" {
     bin_dir             = module.setup_clis.bin_dir
     cluster_name        = local.cluster_name
     resource_group_name = data.azurerm_resource_group.resource_group.name
-    subscription_id     = var.subscription_id
-    tenant_id           = var.tenant_id
-    client_id           = var.client_id
-    client_secret       = nonsensitive(var.client_secret)
+    subscription_id     = data.azurerm_client_config.default.subscription_id
+    tenant_id           = data.azurerm_client_config.default.tenant_id
+    client_id           = data.azurerm_key_vault_secret.aro-sp-client-id.value
+    client_secret       = data.azurerm_key_vault_secret.aro-sp-client-secret.value
     access_token        = ""
   }
 }
@@ -265,15 +339,11 @@ resource "time_sleep" "wait_for_cluster" {
   create_duration = "2m"
 }
 
-data "external" "login" {
-  program = ["bash","${path.module}/scripts/login-cluster.sh"]
+module "oc_login" {
+  source = "github.com/cloud-native-toolkit/terraform-ocp-login.git?ref=v1.6.0"
 
-  query = {
-    bin_dir     = module.setup_clis.bin_dir
-    kubeconfig  = local.cluster_config
-    username    = data.external.aro.result.kubeadminUsername
-    password    = data.external.aro.result.kubeadminPassword
-    server_url  = data.external.aro.result.serverUrl
-  }
+  server_url      = data.external.aro.result.serverUrl
+  login_user      = data.external.aro.result.kubeadminUsername
+  login_password  = data.external.aro.result.kubeadminPassword
+  login_token     = ""
 }
-

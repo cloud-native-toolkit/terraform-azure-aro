@@ -3,30 +3,11 @@ variable "resource_group_name" {
   description = "The name of the resource group where the cluster will be provisioned"
 }
 
-variable "subscription_id" {
-  type        = string
-  description = "The id of the subscription where the cluster will be provisioned"
-}
-
-variable "tenant_id" {
-  type        = string
-  description = "The id of the tenant within the subscription to provision the cluster"
-}
-
-variable "client_id" {
-  type        = string
-  description = "The client_id or username to access the tenant"
-}
-
 variable "client_secret" {
   type        = string
-  description = "The secret used to access the tenant"
+  description = "The secret used to access the subscription"
   sensitive   = true
-}
-
-variable "region" {
-  type        = string
-  description = "The location where the cluster should be provisioned"
+  default     = ""
 }
 
 variable "master_subnet_id" {
@@ -50,13 +31,13 @@ variable "master_flavor" {
   default     = "Standard_D8s_v3"
 }
 
-variable "flavor" {
+variable "worker_flavor" {
   type        = string
   description = "The size of the VMs for the worker nodes"
   default     = "Standard_D4s_v3"
 }
 
-variable "_count" {
+variable "worker_count" {
   type        = number
   description = "The number of compute worker nodes"
   default     = 3
@@ -92,7 +73,7 @@ variable "disable_public_endpoint" {
   default     = false
 }
 
-variable "disk_size" {
+variable "worker_disk_size" {
   type        = number
   description = "The size in GB of the disk for each worker node"
   default     = 128
@@ -116,21 +97,38 @@ variable "label" {
   default     = "cluster"
 }
 
+variable "key_vault_id" {
+  type = string
+  description = "THe Azure id of an existing key vault to use to store ARO Service Principal credentials (default = \"\")"
+  default = ""
+}
+
 variable "encrypt" {
   type        = bool
   description = "Flag to encrypt the VM disks (default = false)"
   default     = false
 }
 
-variable "key_vault_name" {
-  type = string
-  description = "Name of existing key vault to use (default = \"\")"
-  default = ""
+variable "pod_cidr" {
+  type        = string
+  description = "CIDR for the POD subnet (default = \"10.128.0.0/14\")"
+  default     = "10.128.0.0/14"
 }
 
-variable "enable_purge" {
+variable "service_cidr" {
+  type        = string
+  description = "CIDR for the services subnet (default = \"172.30.0.0/16\")"
+  default     = "172.30.0.0/16"
+}
+variable "fips" {
   type        = bool
-  description = "Flag to enable resources to be automatically deleted. Mainly used in automated testing. (Default = false)"
+  description = "Flag to determine if FIPS validated modules should be utilized (default = false)"
   default     = false
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "List of tags to be included as \"name\":\"value\" pairs (default = {})"
+  default     = {}
 }
 
